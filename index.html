@@ -1,503 +1,304 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Relatório Enfermeiro | SAMU 192</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    /* --- TEMA CLARO (LIGHT MODE) --- */
-    :root {
-      --bg-color: #f3f4f6;
-      --card-bg: #ffffff;
-      --text-main: #1f2937;
-      --text-muted: #6b7280;
-      --samu-orange: #f97316;
-      --samu-red: #ef4444;
-      --samu-blue: #0ea5e9;
-      --input-bg: #f9fafb;
-      --border-color: #e5e7eb;
-      --border-radius: 12px;
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      margin: 0;
-      padding: 15px;
-      padding-bottom: 80px;
-      line-height: 1.5;
-    }
-
-    /* Cabeçalho */
-    header {
-      text-align: center;
-      margin-bottom: 25px;
-      padding: 25px;
-      background: var(--card-bg);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      border-bottom: 4px solid var(--samu-orange);
-    }
-
-    header h1 {
-      font-family: 'Poppins', sans-serif;
-      font-size: 1.4rem;
-      margin: 0;
-      color: var(--samu-red);
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    header div { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500; }
-
-    /* Cartões */
-    .card {
-      background-color: var(--card-bg);
-      padding: 25px;
-      border-radius: var(--border-radius);
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border-color);
-    }
-
-    /* Labels e Inputs */
-    label {
-      display: block;
-      margin-top: 18px;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-family: 'Poppins', sans-serif;
-      margin-bottom: 6px;
-    }
-
-    select, input, textarea {
-      width: 100%;
-      padding: 14px;
-      background-color: var(--input-bg);
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      color: var(--text-main);
-      font-size: 1rem;
-      font-family: 'Inter', sans-serif;
-      outline: none;
-      transition: all 0.2s ease;
-      text-transform: uppercase; /* Caps Lock Visual */
-    }
-
-    select:focus, input:focus, textarea:focus {
-      border-color: var(--samu-orange);
-      background-color: #fff;
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-    }
-
-    /* Campos Ocultos "Outro" */
-    .hidden-input {
-      display: none;
-      margin-top: 8px;
-      animation: fadeIn 0.3s ease;
-    }
-    .hidden-input input {
-      border-left: 4px solid var(--samu-orange);
-      background-color: #fff7ed; /* Fundo levemente laranja */
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Opções Aprendidas pela Memória */
-    option.aprendida {
-      background-color: #f0fdf4; /* Verde claro */
-      color: #15803d;
-      font-weight: 600;
-    }
-
-    /* --- ÁREA DO ASSISTENTE IA --- */
-    .ai-assistant-panel {
-      background-color: #f0f9ff;
-      border: 1px solid #bae6fd;
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 10px;
-    }
-
-    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; color: #0284c7; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 0.9rem; }
-    .ai-tools { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal SAMU 192 - Recursos</title>
     
-    .ai-btn {
-      background: #fff; border: 1px solid #0ea5e9; color: #0284c7;
-      padding: 8px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 600;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .ai-btn:active { transform: scale(0.95); background: #e0f2fe; }
-    .ai-btn.danger { border-color: #ef4444; color: #ef4444; }
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 
-    textarea { min-height: 300px; line-height: 1.6; resize: vertical; background-color: #fff; border-color: #bae6fd; }
+    <style>
+        /* --- CONFIGURAÇÕES GERAIS --- */
+        :root {
+            /* Cores do Portal */
+            --primary-color: #0047AB; 
+            --accent-color: #E50000;  
+            --text-color: #333;
+            --bg-light: #f9f9f9;
+            --nav-text: #1F4373;
 
-    button.submit {
-      width: 100%;
-      background: linear-gradient(to right, var(--samu-red), var(--samu-orange));
-      color: white; border: none; padding: 20px; font-size: 1.1rem;
-      font-family: 'Poppins', sans-serif; font-weight: 600;
-      border-radius: 12px; cursor: pointer; margin-top: 20px;
-      box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25); letter-spacing: 1px;
-    }
-    button.submit:disabled { background: #9ca3af; box-shadow: none; opacity: 0.7; }
+            /* Cores do Rodapé */
+            --samu-orange: #f97316;
+            --samu-blue: #0ea5e9;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --footer-bg: #e5e7eb;
+        }
 
-    /* --- RODAPÉ PROFISSIONAL --- */
-    footer {
-      margin-top: 40px;
-      padding: 30px 20px;
-      background-color: #e5e7eb;
-      border-top: 4px solid var(--samu-orange);
-      border-radius: 12px 12px 0 0;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    .footer-content {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 20px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
+        body {
+            min-height: 100vh;
+            background-color: #f4f4f4; 
+            background-image: url("imgmenu/fundobranco.png");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            font-family: "Poppins", sans-serif;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+        }
 
-    .footer-section {
-      flex: 1;
-      min-width: 200px;
-      text-align: center;
-    }
+        /* --- MENU (Mantido igual) --- */
+        nav {
+            display: flex; justify-content: flex-end;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative; z-index: 10;
+        }
+        nav ul {
+            width: 100%; list-style: none; display: flex;
+            justify-content: flex-end; align-items: center; padding: 0 20px;
+        }
+        nav li { height: 70px; }
+        nav li:first-child { margin-right: auto; display: flex; align-items: center; }
+        nav a {
+            height: 100%; padding: 0 20px; text-decoration: none; display: flex; align-items: center;
+            color: var(--nav-text); font-weight: 500; transition: color 0.3s;
+        }
+        nav a:hover { color: var(--primary-color); }
+        .logotipo a { font-weight: 800; font-size: 1.5rem; color: var(--primary-color); }
+        .icon { fill: #333; transition: fill 0.3s; }
+        nav a:hover .icon { fill: var(--accent-color); }
 
-    .footer-section h4 {
-      margin: 0 0 5px 0;
-      color: var(--text-main);
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 0.9rem;
-    }
+        /* --- SIDEBAR --- */
+        .sidebar {
+            position: fixed; top: 0; right: 0; height: 100vh; width: 280px; z-index: 999;
+            background-color: rgba(255, 255, 255, 0.98);
+            box-shadow: -10px 0 20px rgba(0, 0, 0, 0.2);
+            display: none; flex-direction: column; align-items: flex-start; padding-top: 20px;
+        }
+        .sidebar li { width: 100%; }
+        .sidebar a { width: 100%; padding: 20px; border-bottom: 1px solid #eee; }
+        @media (max-width: 948px) { .hidemobile { display: none; } }
+        @media (min-width: 948px) { .hidedesktop { display: none; } }
 
-    .footer-section p {
-      margin: 0;
-      line-height: 1.4;
-    }
+        /* --- CONTEÚDO --- */
+        .conteudo {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            padding: 40px 20px; width: 100%; max-width: 1200px; margin: 0 auto;
+        }
+        .welcome-header {
+            background: linear-gradient(135deg, var(--primary-color), #003380);
+            color: white; padding: 40px 30px; text-align: center; border-radius: 15px;
+            margin-bottom: 40px; box-shadow: 0 10px 20px rgba(0, 71, 171, 0.3); width: 100%;
+        }
+        .welcome-header h1 { font-size: 2em; margin-bottom: 10px; font-weight: 700; }
+        .alert-box {
+            background-color: #fff3cd; color: #856404; border-left: 5px solid #ffeeba;
+            padding: 20px; border-radius: 8px; margin-bottom: 40px; width: 100%;
+            text-align: center; font-weight: 500; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .link-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px; width: 100%;
+        }
+        .link-group {
+            background-color: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .link-group:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
+        .link-group h3 {
+            color: var(--primary-color); border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 15px; margin-bottom: 20px; font-size: 1.3em; font-weight: 700; text-transform: uppercase;
+        }
+        .link-group a {
+            display: block; width: 100%; margin-bottom: 12px; padding: 15px;
+            background-color: var(--bg-light); color: #444; text-decoration: none;
+            border-radius: 8px; transition: all 0.3s; font-weight: 500; border-left: 4px solid #ddd; height: auto;
+        }
+        .link-group a:hover {
+            background-color: var(--primary-color); color: white; border-left-color: var(--accent-color); padding-left: 20px;
+        }
+        .link-group a.main-action {
+            background-color: var(--accent-color); color: white; border: none; text-align: center; font-weight: bold; margin-top: 20px;
+        }
+        .link-group a.main-action:hover { background-color: #cc0000; }
 
-    .dev-tag {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 4px 12px;
-      background-color: white;
-      border: 1px solid #d1d5db;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--samu-blue);
-    }
-    
-    /* Responsivo Rodapé */
-    @media (max-width: 600px) {
-      .footer-content {
-        flex-direction: column;
-        text-align: center;
-      }
-      .footer-section { text-align: center !important; }
-    }
-  </style>
+        /* --- RODAPÉ AJUSTADO --- */
+        footer {
+            margin-top: auto;
+            background-color: var(--footer-bg);
+            border-top: 4px solid var(--samu-orange);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start; /* Alinhamento ao topo */
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px; /* Padding interno das colunas */
+            width: 100%;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .footer-section h4 {
+            margin: 0 0 5px 0;
+            color: var(--text-main);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .footer-section p { margin: 0; line-height: 1.4; }
+
+        .dev-tag {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background-color: white;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--samu-blue);
+        }
+
+        /* BARRA INFERIOR (TEXTO JURÍDICO) */
+        .footer-legal {
+            width: 100%;
+            background-color: #d1d5db; /* Um tom levemente mais escuro que o footer */
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 0.75rem; /* Fonte menor */
+            color: #4b5563;
+            border-top: 1px solid #bbb;
+        }
+        
+        .footer-legal p {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            .footer-content { flex-direction: column; text-align: center; }
+            .footer-section { text-align: center !important; margin-bottom: 15px; }
+        }
+
+    </style>
 </head>
+
 <body>
 
-<header>
-  <h1>SAMU 192 BOA VISTA</h1>
-  <div>RELATÓRIO DO ENFERMEIRO DE PLANTÃO</div>
-</header>
+    <nav>
+        <ul>
+            <li class="logotipo"><a href="#">Lucivaldo Barroso</a></li>
+            <li class="hidemobile"><a href="#">Início</a></li>
+            <li class="hidemobile"><a href="#">Frequência</a></li>
+            <li class="hidemobile"><a href="#">Escalas</a></li>
+            <li class="hidemobile"><a href="#">Financeiro</a></li>
+            <li class="hidedesktop" onclick="abrirSidebar()">
+                <a href="#">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px">
+                        <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
+                    </svg>
+                </a>
+            </li>
+        </ul>
+        <ul class="sidebar">
+            <li onclick="fecharSidebar()" style="justify-content: flex-end; display: flex;">
+                <a href="#">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px">
+                        <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                    </svg>
+                </a>
+            </li>
+            <li><a href="#">Início</a></li>
+            <li><a href="#">Frequência</a></li>
+            <li><a href="#">Escalas</a></li>
+            <li><a href="#">Financeiro</a></li>
+        </ul>
+    </nav>
 
-<form id="reportForm" onsubmit="enviarDados(event)">
+    <div class="conteudo">
+        <div class="welcome-header">
+            <h1>PORTAL DE RECURSOS SAMU 192</h1>
+            <p>Boa Vista / Roraima — Acesso rápido à sua documentação.</p>
+        </div>
 
-  <div class="card">
-    <div class="section-label"> DADOS DO PLANTÃO </div>
+        <div class="alert-box">
+            📢 <strong>AVISO:</strong> Escala 2026 e Programação de Férias disponíveis abaixo.
+        </div>
 
-    <label>DATA *</label>
-    <input type="date" name="dataPlantao" required>
+        <div class="link-grid">
+            <div class="link-group">
+                <h3>📅 OPERACIONAL / FREQUÊNCIA</h3>
+                <a href="http://lucivaldobarroso.enf.br/00usaslfindex.html">🚑 USA - LANÇAMENTO DE FICHA</a>
+                <a href="http://saude.prefeitura.boavista.br/index.php">✅ FREQUÊNCIA GERAL</a>
+                <a href="https://portalcidadao.prefeitura.boavista.br/default.aspx">🖊️ ASSINAR FREQUÊNCIA (Portal Cidadão)</a>
+            </div>
 
-    <label>HORÁRIO *</label>
-    <select name="horario" id="selHorario" onchange="checkOutro('selHorario','divHorario')" required>
-      <option value="" disabled selected>Selecione...</option>
-      <option>06:00 AS 12:00</option>
-      <option>12:00 AS 18:00</option>
-      <option>18:00 AS 06:00</option>
-      <option>06:00 AS 18:00</option>
-      <option>19:00 AS 01:00 (EVENTO)</option>
-      <option value="OUTRO">OUTRO...</option>
-    </select>
-    <div id="divHorario" class="hidden-input">
-      <input type="text" name="horario_custom" placeholder="Digite o horário">
+            <div class="link-group">
+                <h3>🗓️ ESCALAS E DOCUMENTOS</h3>
+                <a href="https://drive.google.com/drive/folders/1vNMLANonEqXfhJBmvcTRt8Yq0x_upkLp?usp=drive_link">🚑 ESCALA SAMU 2026</a>
+                <a href="https://docs.google.com/spreadsheets/d/1QmuWfN_Hi_x6p0rXWn4BkV45XCEsHabGd-EwQWaH-5o/edit?pli=1&gid=279902869#gid=279902869">🏖️ PROGRAMAÇÃO DE FÉRIAS 25/26</a>
+                <a href="https://saude.prefeitura.boavista.br/index.php">📄 REQUERIMENTOS / PROTOCOLOS</a>
+            </div>
+
+            <div class="link-group">
+                <h3>💰 FINANCEIRO E FUNÇÃO</h3>
+                <a href="http://sipweb.boavista.rr.gov.br:8080/sipweb/trabalhador/login/login.xhtml" class="main-action">⭐ CONTRA CHEQUE (SIPWEB)</a>
+                <a href="http://lucivaldobarroso.enf.br/">👨‍⚕️ RELATÓRIO ENFERMEIRO SAMU BV</a>
+                <a href="#">📚 CALENDÁRIO DE EVENTOS</a>
+            </div>
+        </div> 
     </div>
 
-    <label>VTR *</label>
-    <select name="vtr" id="selVtr" onchange="checkOutro('selVtr','divVtr')" required style="border-left: 4px solid var(--samu-orange);">
-      <option value="" disabled selected>Selecione a Unidade...</option>
-      <option>USA 01</option>
-      <option>USA 02</option>
-      <option>EVENTO</option>
-      <option value="OUTRO">OUTRO...</option>
-    </select>
-    <div id="divVtr" class="hidden-input">
-      <input type="text" name="vtr_custom" placeholder="Digite a unidade">
-    </div>
+    <footer>
+        <div class="footer-content">
+          
+          <div class="footer-section" style="text-align: left;">
+            <h4>SAMU 192</h4>
+            <p>Sistema de Relatório Digital</p>
+            <p>Boa Vista - RR</p>
+          </div>
+    
+          <div class="footer-section">
+            <div class="dev-tag">Dev: Lucivaldo Oliveira Barroso</div>
+          </div>
+    
+          <div class="footer-section" style="text-align: right;">
+            <h4>LB CONEXÃO SAÚDE</h4>
+            <p>Soluções em Saúde e Tecnologia</p>
+            <p style="font-size: 0.7rem; margin-top: 4px;">Versão Web 2.0</p>
+          </div>
+    
+        </div>
 
-    <label>ENFERMEIRO *</label>
-    <select name="respPreenchimento" id="selEnf" class="list-enfermeiros" onchange="checkOutro('selEnf','divEnf')" required>
-      </select>
-    <div id="divEnf" class="hidden-input">
-      <input type="text" name="resp_custom" placeholder="Digite seu nome">
-    </div>
+        <div class="footer-legal">
+            <p>
+                © 2025 Todos os Direitos Reservados. <br>
+                <em>Aviso: Este é um portal de recursos de iniciativa particular. Os links externos direcionam para sistemas internos do SAMU 192 Boa Vista.</em>
+            </p>
+        </div>
+    </footer>
 
-    <label>COREN *</label>
-    <select name="coren" id="selCoren" onchange="checkOutro('selCoren','divCoren')" required>
-      <option value="" disabled selected>Selecione...</option>
-      <option>260.099</option>
-      <option>466.133</option>
-      <option>349.953</option>
-      <option>273.275</option>
-      <option>265.710</option>
-      <option>115.223</option>
-      <option>349.963</option>
-      <option>662.963</option>
-      <option>248.169</option>
-      <option>354.666</option>
-      <option>618.059</option>
-      <option value="OUTRO">OUTRO...</option>
-    </select>
-    <div id="divCoren" class="hidden-input">
-      <input type="text" name="coren_custom" placeholder="Digite o COREN">
-    </div>
-  </div>
-
-  <div class="card" style="border-top: 4px solid #0ea5e9;">
-    <div class="ai-header"><span>ASSISTENTE DE PREENCHIMENTO</span></div>
-    <div class="ai-assistant-panel">
-      <div class="ai-tools">
-        <div class="ai-btn" onclick="iaGerar('inicio')">📄 Início</div>
-        <div class="ai-btn" onclick="iaGerar('check')">✅ Checklist</div>
-        <div class="ai-btn" onclick="iaGerar('intercorrencia')">⚠️ Ocorrência</div>
-        <div class="ai-btn" onclick="iaGerar('final')">🏁 Finalizar</div>
-        <div class="ai-btn danger" onclick="limparTexto()">🗑️ Limpar</div>
-      </div>
-      <textarea name="relatorioTexto" id="txtRelatorio" placeholder="O assistente ajudará a escrever seu relatório aqui..." required></textarea>
-    </div>
-  </div>
-
-  <button type="submit" class="submit" id="btnSalvar">ENVIAR RELATÓRIO OFICIAL</button>
-  
-  <footer>
-    <div class="footer-content">
-      
-      <div class="footer-section" style="text-align: left;">
-        <h4>SAMU 192</h4>
-        <p>Sistema de Relatório Digital</p>
-        <p>Boa Vista - RR</p>
-      </div>
-
-      <div class="footer-section">
-        <p>&copy; 2025 Todos os Direitos Reservados</p>
-        <div class="dev-tag">Dev: Lucivaldo Oliveira Barroso</div>
-      </div>
-
-      <div class="footer-section" style="text-align: right;">
-        <h4>LB CONEXÃO SAÚDE</h4>
-        <p>Soluções em Saúde e Tecnologia</p>
-        <p style="font-size: 0.7rem; margin-top: 4px;">Versão Web 2.0</p>
-      </div>
-
-    </div>
-  </footer>
-
-</form>
-
-<script>
-  // ==========================================================
-  // 1. CONFIGURAÇÃO DO GOOGLE APPS SCRIPT (SUA NOVA URL)
-  // ==========================================================
-  const URL_API = "https://script.google.com/macros/s/AKfycbwet1RtpTP5T-3HuwN97v3brMmUPggs_1teKLdusPr1FEMABuInKW2uMU4Rdu2xbQyC8A/exec"; 
-
-  // --- CAPS LOCK AUTO ---
-  document.addEventListener('input', function(e) {
-    if ((e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') && e.target.type !== 'date') {
-        var start = e.target.selectionStart;
-        var end = e.target.selectionEnd;
-        e.target.value = e.target.value.toUpperCase();
-        e.target.setSelectionRange(start, end);
-    }
-  });
-
-  // --- LISTA DE ENFERMEIROS PADRÃO ---
-  const ENFERMEIROS = ["DANIEL GUIMARÃES DA SILVA", "EDSON SOARES PINTO", "GEISA CAMILA MOREIRA TAVARES DE MENEZES", "GERLIVANE ALVES DE FREITAS SOUSA", "LUCIANO JOSÉ COUTINHO", "LUCIVALDO OLIVEIRA BARROSO", "MARIA DE LA PAZ PEREZ SAMPAIO", "MARINETE GOMES BARRETO", "SARA BRENDA DE SOUSA JESUS", "SHEYLA BATISTA DOS SANTOS", "GALTHAMA BRASIL"];
-
-  const KEY_HORARIO = 'memoria_horarios';
-  const KEY_VTR = 'memoria_vtrs';
-  const KEY_ENF = 'memoria_enfermeiros';
-  const KEY_COREN = 'memoria_corens';
-
-  window.onload = function() {
-    const select = document.querySelector('.list-enfermeiros');
-    select.innerHTML = '<option value="" disabled selected>SELECIONE...</option>';
-    ENFERMEIROS.forEach(nome => {
-        let opt = document.createElement('option');
-        opt.value = nome; opt.innerText = nome;
-        select.appendChild(opt);
-    });
-    let optOutro = document.createElement('option');
-    optOutro.value = "OUTRO"; optOutro.innerText = "OUTRO...";
-    select.appendChild(optOutro);
-
-    carregarMemoria('selHorario', KEY_HORARIO);
-    carregarMemoria('selVtr', KEY_VTR);
-    carregarMemoria('selEnf', KEY_ENF);
-    carregarMemoria('selCoren', KEY_COREN);
-  };
-
-  // --- SISTEMA DE MEMÓRIA ---
-  function carregarMemoria(selectId, key) {
-    const select = document.getElementById(selectId);
-    const salvos = JSON.parse(localStorage.getItem(key) || "[]");
-    const optionOutro = select.querySelector('option[value="OUTRO"]');
-    select.querySelectorAll('.aprendida').forEach(el => el.remove());
-    salvos.forEach(item => {
-      let opt = document.createElement('option');
-      opt.value = item; 
-      opt.innerText = item + " (SALVO)";
-      opt.classList.add('aprendida');
-      select.insertBefore(opt, optionOutro);
-    });
-  }
-
-  function salvarNovoItem(selectId, inputName, key, form) {
-    const select = document.getElementById(selectId);
-    const input = form.querySelector('[name="'+inputName+'"]');
-    if(select.value === 'OUTRO' && input && input.value.trim() !== "") {
-      const novoItem = input.value.toUpperCase().trim();
-      const salvos = JSON.parse(localStorage.getItem(key) || "[]");
-      if(!salvos.includes(novoItem)) {
-        salvos.push(novoItem);
-        localStorage.setItem(key, JSON.stringify(salvos));
-      }
-    }
-  }
-
-  function checkOutro(selectId, divId) {
-    var val = document.getElementById(selectId).value;
-    var div = document.getElementById(divId);
-    var input = div.querySelector('input');
-    if(val === 'OUTRO') {
-       div.style.display = 'block'; input.required = true;
-    } else {
-       div.style.display = 'none'; input.required = false; input.value = '';
-    }
-  }
-
-  // --- IA TEMPLATES ---
-  const templates = {
-    'inicio': "INICIO O PLANTÃO ÀS [HORA], EQUIPE COMPLETA E POSICIONADA. REALIZADA A CONFERÊNCIA DE MATERIAIS E EQUIPAMENTOS DAS VIATURAS. TUDO EM CONFORMIDADE.\n",
-    'check': "CHECKLIST REALIZADO:\n- MEDICAMENTOS: OK\n- MATERIAL DE CONSUMO: OK\n- EQUIPAMENTOS: OK\n- SISTEMA DE RÁDIO: OPERANTE\nOBSERVAÇÕES DO CHECKLIST:\n",
-    'intercorrencia': "REGISTRO DE INTERCORRÊNCIA:[O QUE HOUVE]\nHORÁRIO:[DA INTERCORRÊNCIA] \nENVOLVIDOS:[SERVIDORES OU VIATURA ENVOLVIDA] \nDESCRIÇÃO DO FATO: \nCONDUTA ADOTADA: \n",
-    'final': "SEM MAIS ALTERAÇÕES ATÉ O MOMENTO, PASSO O PLANTÃO PARA A PRÓXIMA EQUIPE. \nASS:[NOME DO ENFERMEIRO]."
-  };
-
-  function iaGerar(tipo) {
-    const textarea = document.getElementById('txtRelatorio');
-    if (textarea.value.length > 0) textarea.value += "\n";
-    textarea.value += templates[tipo];
-    textarea.scrollTop = textarea.scrollHeight;
-  }
-
-  function limparTexto() {
-    if(confirm("Deseja apagar todo o relatório?")) document.getElementById('txtRelatorio').value = "";
-  }
-
-  // ==========================================================
-  // 2. FUNÇÃO QUE ENVIA PARA O GOOGLE APPS SCRIPT
-  // ==========================================================
-  function enviarDados(e) {
-      e.preventDefault();
-      var btn = document.getElementById('btnSalvar');
-      var originalText = btn.innerText;
-      btn.disabled = true;
-      btn.innerText = "ENVIANDO DADOS...";
-
-      var form = document.getElementById('reportForm');
-
-      // 1. Salvar Memória Local
-      salvarNovoItem('selHorario', 'horario_custom', KEY_HORARIO, form);
-      salvarNovoItem('selVtr', 'vtr_custom', KEY_VTR, form);
-      salvarNovoItem('selEnf', 'resp_custom', KEY_ENF, form);
-      salvarNovoItem('selCoren', 'coren_custom', KEY_COREN, form);
-
-      // 2. Preparar Dados
-      const formData = new FormData(form);
-      const data = {};
-      
-      // Pega todos os dados básicos
-      formData.forEach((value, key) => data[key] = value);
-
-      // Tratamento para campos "OUTRO"
-      const dadosFinais = {
-          'Data': data.dataPlantao,
-          'Horario': (data.horario === 'OUTRO') ? data.horario_custom : data.horario,
-          'VTR': (data.vtr === 'OUTRO') ? data.vtr_custom : data.vtr,
-          'Enfermeiro': (data.respPreenchimento === 'OUTRO') ? data.resp_custom : data.respPreenchimento,
-          'Coren': (data.coren === 'OUTRO') ? data.coren_custom : data.coren,
-          'Relatorio': data.relatorioTexto,
-          'Data do Envio': new Date().toLocaleString()
-      };
-
-      // 3. Enviar para Google Script (Formato URLSearchParams)
-      const params = new URLSearchParams(dadosFinais);
-
-      fetch(URL_API, {
-          method: 'POST',
-          body: params
-      })
-      .then(response => response.json()) // O Google Script deve retornar JSON
-      .then(data => {
-          if (data.result === 'success') {
-              alert('✅ RELATÓRIO ENVIADO COM SUCESSO!');
-              
-              form.reset();
-              document.querySelectorAll('.hidden-input').forEach(el => el.style.display = 'none');
-              
-              carregarMemoria('selHorario', KEY_HORARIO);
-              carregarMemoria('selVtr', KEY_VTR);
-              carregarMemoria('selEnf', KEY_ENF);
-              carregarMemoria('selCoren', KEY_COREN);
-
-              window.scrollTo(0,0);
-          } else {
-              alert('⚠️ Erro ao salvar na planilha. Tente novamente.');
-              console.error(data);
-          }
-          btn.disabled = false;
-          btn.innerText = originalText;
-      })
-      .catch((error) => {
-          console.error('Erro:', error);
-          alert('✅ RELATÓRIO ENVIADO! \n(Nota: O Google às vezes não retorna confirmação, verifique a planilha.)');
-          // Limpa mesmo se der erro de rede, pois geralmente o Google salva
-          form.reset();
-          btn.disabled = false;
-          btn.innerText = originalText;
-      });
-  }
-</script>
-
+    <script>
+        function abrirSidebar() {
+            const sidebar = document.querySelector(".sidebar");
+            sidebar.style.display = "flex";
+        }
+        function fecharSidebar() {
+            const sidebar = document.querySelector(".sidebar");
+            sidebar.style.display = "none";
+        }
+    </script>
 </body>
 </html>
