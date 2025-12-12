@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>USA | REGISTRO TABULAR | SAMU 192</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           ESTILOS GERAIS (DESKTOP & BASE)
+           ========================================= */
+        :root {
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --samu-orange: #f97316;
+            --samu-red: #ef4444;
+            --samu-blue: #0ea5e9;
+            --input-bg: #f9fafb;
+            --border-color: #e5e7eb;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --header-bg-table: #f1f5f9;
+            --footer-bg: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            padding-bottom: 80px;
+            line-height: 1.5;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border-bottom: 4px solid var(--samu-red);
+        }
+        header h1 { font-family: 'Poppins', sans-serif; font-size: 1.2rem; margin: 0; color: var(--samu-red); text-transform: uppercase; font-weight: 700; }
+        header div { font-size: 0.8rem; color: var(--text-muted); margin-top: 5px; font-weight: 500; text-transform: uppercase; }
+
+        /* CARD TABLE CONTAINER */
+        .card-table {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            overflow: hidden; 
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            color: var(--samu-blue);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0f2fe;
+            text-transform: uppercase;
+            display: flex; align-items: center;
+        }
+        .section-title::before {
+            content: ''; display: inline-block; width: 6px; height: 18px;
+            background-color: var(--samu-orange); margin-right: 10px; border-radius: 4px;
+        }
+
+        /* TABELA DESKTOP */
+        .table-responsive { width: 100%; overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            min-width: 950px; /* Garante visual perfeito no PC */
+            table-layout: fixed; 
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+            vertical-align: top; 
+        }
+
+        th {
+            background-color: var(--header-bg-table);
+            color: var(--text-main);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        /* INPUTS GERAIS */
+        select, input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--input-bg);
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            color: var(--text-main);
+            font-size: 0.75rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            white-space: pre-wrap; 
+        }
+        select { text-overflow: ellipsis; }
+        
+        textarea {
+            resize: none; overflow: hidden; min-height: 38px; height: auto; line-height: 1.3; display: block;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            border-color: var(--samu-orange);
+            background-color: #fff;
+            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
+        }
+
+        /* ESTILOS DE CÉLULA DESKTOP */
+        td.col-funcao {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: var(--samu-blue);
+            text-align: center;
+            font-size: 0.75rem;
+            vertical-align: middle;
+        }
+        
+        td.vtr-cell {
+            background-color: #fff7ed;
+            color: var(--samu-orange);
+            font-weight: 800;
+            text-align: center;
+            border-right: 2px solid var(--samu-orange);
+            vertical-align: middle;
+        }
+
+        /* =========================================
+           AJUSTES PARA CELULAR (MOBILE OPTIMIZATION)
+           ========================================= */
+        @media (max-width: 768px) {
+            /* Transforma tabela em blocos */
+            table, thead, tbody, th, td, tr { display: block; }
+            thead tr { position: absolute; top: -9999px; left: -9999px; }
+            table { min-width: 100%; }
+
+            /* Cada linha vira um "Cartão" separado */
+            tr { 
+                margin-bottom: 20px; /* Mais espaço entre profissionais */
+                border: 1px solid #d1d5db; 
+                border-radius: 12px; /* Borda mais arredondada */
+                overflow: hidden;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.06); /* Sombra mais destacada */
+                background: white;
+            }
+            
+            /* Ajuste das células */
+            td { 
+                border: none;
+                border-bottom: 1px solid #f0f0f0; 
+                position: relative;
+                padding: 10px 15px 10px 15px; /* Padding confortável */
+                display: flex;
+                flex-direction: column;
+            }
+            td:last-child { border-bottom: none; }
+
+            /* Rótulos (Labels) acima do input */
+            td::before { 
+                content: attr(data-label); 
+                font-size: 0.7rem; 
+                font-weight: 700;
+                color: var(--samu-red); 
+                text-transform: uppercase;
+                margin-bottom: 4px;
+                display: block;
+            }
+
+            /* Inputs Maiores para Dedo */
+            select, input[type="text"], input[type="date"], textarea {
+                font-size: 16px; /* Evita zoom no iPhone */
+                padding: 12px; /* Área de toque maior */
+                height: auto;
+                min-height: 48px; /* Altura mínima confortável */
+                border: 1px solid #ccc;
+            }
+
+            /* Estilo Especial para a Célula de FUNÇÃO (Vira o cabeçalho do card) */
+            td.col-funcao {
+                background-color: #e0f2fe; /* Azul claro destaque */
+                color: var(--samu-blue);
+                font-size: 1rem;
+                padding: 12px;
+                text-align: left;
+                border-bottom: 2px solid var(--samu-blue);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            td.col-funcao::before { content: none; } /* Remove label duplicado */
+            
+            /* Estilo Especial para a Célula de VIATURA (Vira cabeçalho laranja) */
+            td.vtr-cell { 
+                width: 100%; 
+                border-right: none; 
+                border-bottom: 4px solid var(--samu-orange); 
+                padding: 12px;
+                background-color: var(--samu-orange);
+                color: white;
+                font-size: 1.2rem;
+                text-align: center;
+            }
+        }
+
+        /* BUTTON */
+        button.submit {
+            width: 100%;
+            background: linear-gradient(to right, var(--samu-red), var(--samu-orange));
+            color: white; border: none; padding: 20px;
+            font-size: 1.1rem; font-family: 'Poppins', sans-serif; font-weight: 600;
+            border-radius: 12px; cursor: pointer; margin-top: 10px; margin-bottom: 40px;
+            box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25);
+            letter-spacing: 1px; transition: transform 0.2s;
+        }
+        button.submit:hover { transform: scale(1.01); }
+        button.submit:disabled { background: #9ca3af; transform: none; box-shadow: none; }
+
+        /* FOOTER */
+        footer {
+            margin-top: auto; background-color: var(--footer-bg);
+            border-top: 4px solid var(--samu-orange); color: var(--text-muted);
+            font-size: 0.85rem; display: flex; flex-direction: column;
+            border-radius: 12px 12px 0 0; 
+        }
+        .footer-content {
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;
+            gap: 20px; max-width: 900px; margin: 0 auto; padding: 30px 20px; width: 100%;
+        }
+        .footer-section { flex: 1; min-width: 200px; text-align: center; }
+        .footer-section h4 {
+            margin: 0 0 5px 0; color: var(--text-main); font-family: 'Poppins', sans-serif; font-weight: 700;
+            text-transform: uppercase; font-size: 0.9rem;
+        }
+        .footer-section p { margin: 0; line-height: 1.4; }
+        .dev-tag {
+            display: inline-block; margin-top: 8px; padding: 4px 12px;
+            background-color: white; border: 1px solid #d1d5db; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600; color: var(--samu-blue);
+        }
+        .footer-legal {
+            width: 100%; background-color: #d1d5db; padding: 15px 20px;
+            text-align: center; font-size: 0.75rem; color: #4b5563; border-top: 1px solid #bbb;
+        }
+        @media (max-width: 600px) {
+            .footer-content { flex-direction: column; text-align: center; }
+            .footer-section { text-align: center !important; margin-bottom: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>SAMU 192 BOA VISTA</h1>
+    <div> |Registro Oficial de Plantão|</div>
+</header>
+
+<form id="plantaoForm" onsubmit="prepararEEnviar(event)">
+
+    <div class="card-table">
+        <div class="section-title">DADOS DO PLANTÃO</div>
+        <div class="table-responsive">
+            <table>
+                <colgroup>
+                    <col style="width: 15%"> 
+                    <col style="width: 20%"> 
+                    <col style="width: 45%"> 
+                    <col style="width: 20%"> 
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>DATA</th>
+                        <th>HORÁRIO</th>
+                        <th>ENF. RESPONSÁVEL</th>
+                        <th>COREN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="DATA"><input type="date" name="dataPlantao" required></td>
+                        <td data-label="HORÁRIO">
+                            <select name="horario" required>
+                                <option value="" disabled selected>SELECIONE...</option>
+                                <option>06:00 AS 12:00</option><option>12:00 AS 18:00</option>
+                                <option>18:00 AS 06:00</option><option>06:00 AS 18:00</option>
+                                <option>19:00 AS 01:00 (EVENTO)</option>
+                                <option>OUTROS, INFORMAR...</option>
+                            </select>
+                        </td>
+                        <td data-label="ENF. RESPONSÁVEL"><select name="respPreenchimento" class="list-enfermeiros" required><option value="" disabled selected>Selecione...</option></select></td>
+                        <td data-label="COREN">
+                            <select name="coren" required>
+                                <option value="" disabled selected>SELECIONE...</option>
+                                <option>260.099</option><option>466.133</option><option>349.953</option>
+                                <option>273.275</option><option>265.710</option><option>115.223</option>
+                                <option>349.963</option><option>662.963</option><option>248.169</option>
+                                <option>354.666</option><option>618.059</option>
+                                <option>OUTROS, INFORMAR...</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card-table">
+        <div class="section-title">UNIDADE DE SUPORTE AVANÇADO  - USA 01</div>
+        <div class="table-responsive">
+            <table>
+                <colgroup>
+                    <col style="width: 8%">  
+                    <col style="width: 28%"> 
+                    <col style="width: 15%"> 
+                    <col style="width: 28%"> 
+                    <col style="width: 21%"> 
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>FUNÇÃO</th>
+                        <th>PROFISSIONAL</th>
+                        <th>SERVIÇO</th>
+                        <th>SUBSTITUIÇÃO</th>
+                        <th>OBSERVAÇÃO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-funcao">ENFERMEIRO</td>
+                        <td data-label="ENFERMEIRO"><select name="usa01_enfermeiro" class="list-enfermeiros" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usa01_servico_enf" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usa01_subs_enf" class="list-enfermeiros-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usa01_obs_enf" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="col-funcao">MÉDICO</td>
+                        <td data-label="MÉDICO"><select name="usa01_medico" class="list-medicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usa01_servico_med" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usa01_subs_med" class="list-medicos-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usa01_obs_med" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="col-funcao">CONDUTOR</td>
+                        <td data-label="CONDUTOR"><select name="usa01_condutor" class="list-condutores" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usa01_servico_cond" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usa01_subs_cond" class="list-condutores-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usa01_obs_cond" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card-table">
+        <div class="section-title">UNIDADE DE SUPORTE AVANÇADO  - USA 02</div>
+        <div class="table-responsive">
+            <table>
+                <colgroup>
+                    <col style="width: 8%">
+                    <col style="width: 28%">
+                    <col style="width: 15%">
+                    <col style="width: 28%">
+                    <col style="width: 21%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>FUNÇÃO</th>
+                        <th>PROFISSIONAL</th>
+                        <th>SERVIÇO</th>
+                        <th>SUBSTITUIÇÃO</th>
+                        <th>OBSERVAÇÃO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-funcao">ENFERMEIRO</td>
+                        <td data-label="ENFERMEIRO"><select name="usa02_enfermeiro" class="list-enfermeiros" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usa02_servico_enf" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usa02_subs_enf" class="list-enfermeiros-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usa02_obs_enf" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="col-funcao">MÉDICO</td>
+                        <td data-label="MÉDICO"><select name="usa02_medico" class="list-medicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usa02_servico_med" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usa02_subs_med" class="list-medicos-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usa02_obs_med" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="col-funcao">CONDUTOR</td>
+                        <td data-label="CONDUTOR"><select name="usa02_condutor" class="list-condutores" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usa02_servico_cond" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usa02_subs_cond" class="list-condutores-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usa02_obs_cond" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card-table">
+        <div class="section-title">UNIDADE DE SUPORTE BÁSICO (USB)</div>
+        <div class="table-responsive">
+            <table>
+                <colgroup>
+                    <col style="width: 5%"> 
+                    <col style="width: 8%"> 
+                    <col style="width: 27%"> 
+                    <col style="width: 14%"> 
+                    <col style="width: 27%"> 
+                    <col style="width: 19%"> 
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>VTR</th>
+                        <th>FUNÇÃO</th>
+                        <th>PROFISSIONAL</th>
+                        <th>SERVIÇO</th>
+                        <th>SUBSTITUIÇÃO</th>
+                        <th>OBS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td rowspan="2" class="vtr-cell">USB 01</td>
+                        <td class="col-funcao">TÉCNICO</td>
+                        <td data-label="TÉCNICO"><select name="usb01_tec" class="list-tecnicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usb01_servico_tec" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usb01_subs_tec" class="list-tecnicos-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usb01_obs_tec" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="col-funcao">CONDUTOR</td>
+                        <td data-label="CONDUTOR"><select name="usb01_condutor" class="list-condutores" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usb01_servico_cond" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usb01_subs_cond" class="list-condutores-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usb01_obs_cond" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+
+                    <tr>
+                        <td rowspan="2" class="vtr-cell">USB 02</td>
+                        <td class="col-funcao">TÉCNICO</td>
+                        <td data-label="TÉCNICO"><select name="usb02_tec" class="list-tecnicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usb02_servico_tec" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usb02_subs_tec" class="list-tecnicos-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usb02_obs_tec" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="col-funcao">CONDUTOR</td>
+                        <td data-label="CONDUTOR"><select name="usb02_condutor" class="list-condutores" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usb02_servico_cond" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usb02_subs_cond" class="list-condutores-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usb02_obs_cond" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+
+                    <tr>
+                        <td rowspan="2" class="vtr-cell">USB 03</td>
+                        <td class="col-funcao">TÉCNICO</td>
+                        <td data-label="TÉCNICO"><select name="usb03_tec" class="list-tecnicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usb03_servico_tec" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usb03_subs_tec" class="list-tecnicos-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usb03_obs_tec" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="col-funcao">CONDUTOR</td>
+                        <td data-label="CONDUTOR"><select name="usb03_condutor" class="list-condutores" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usb03_servico_cond" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usb03_subs_cond" class="list-condutores-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usb03_obs_cond" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+
+                    <tr>
+                        <td rowspan="2" class="vtr-cell">USB 04</td>
+                        <td class="col-funcao">TÉCNICO</td>
+                        <td data-label="TÉCNICO"><select name="usb04_tec" class="list-tecnicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usb04_servico_tec" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usb04_subs_tec" class="list-tecnicos-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usb04_obs_tec" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td class="col-funcao">CONDUTOR</td>
+                        <td data-label="CONDUTOR"><select name="usb04_condutor" class="list-condutores" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="usb04_servico_cond" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="usb04_subs_cond" class="list-condutores-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="usb04_obs_cond" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card-table">
+        <div class="section-title">CENTRAL DE MATERIAL ESTERELIZADO (CME)</div>
+        <div class="table-responsive">
+            <table>
+                <colgroup>
+                    <col style="width: 8%">
+                    <col style="width: 28%">
+                    <col style="width: 15%">
+                    <col style="width: 28%">
+                    <col style="width: 21%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>FUNÇÃO</th>
+                        <th>PROFISSIONAL</th>
+                        <th>SERVIÇO</th>
+                        <th>SUBSTITUIÇÃO</th>
+                        <th>OBSERVAÇÃO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-funcao">TÉCNICO</td>
+                        <td data-label="TÉCNICO"><select name="cme_tec" class="list-tecnicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SERVIÇO"><select name="cme_servico_tec" class="list-servicos" required><option value="" selected>Selecione...</option></select></td>
+                        <td data-label="SUBSTITUIÇÃO"><select name="cme_subs_tec" class="list-tecnicos-subs"><option value="" selected>Ninguém</option></select></td>
+                        <td data-label="OBSERVAÇÃO"><textarea name="cme_obs_tec" rows="1" oninput="autoResize(this)"></textarea></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <input type="hidden" name="plantao_detalhes_json" id="plantao_detalhes_json">
+    
+    <button type="submit" class="submit" id="btnSalvar">SALVAR REGISTRO OFICIAL</button>
+
+</form>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-section" style="text-align: left;">
+            <h4>SAMU 192</h4>
+            <p>Sistema de Relatório Digital</p>
+            <p>Boa Vista - RR</p>
+        </div>
+        <div class="footer-section">
+            <div class="dev-tag">Dev: Lucivaldo Barroso</div>
+        </div>
+        <div class="footer-section" style="text-align: right;">
+            <h4>LB CONEXÃO SAÚDE</h4>
+            <p>Soluções em Saúde e Tecnologia</p>
+            <p style="font-size: 0.7rem; margin-top: 4px;">Versão Web 2.0</p>
+        </div>
+    </div>
+    <div class="footer-legal">
+        <p>
+            © 2025 Todos os Direitos Reservados. <br>
+            <em>Aviso: Este é um portal de recursos de iniciativa particular. Os links externos direcionam para sistemas internos do SAMU 192 Boa Vista.</em>
+        </p>
+    </div>
+</footer>
+
+<script>
+    // ==========================================================
+    const URL_API = "https://script.google.com/macros/s/AKfycbytCs6E_cU1TMiX_sjeF6ovRvPGLmkUfsA9qAVfSVq5K2OFakIqn3vvxd-Bn7rTwBy-DQ/exec"; 
+    
+    // LISTAS COM "OUTROS, INFORMAR..." NO FINAL
+    const SERVICOS = ["CARGA HORARIA", "ATESTADO MÉDICO", "TROCA", "FALTA", "FOLGA - FALTA DE EQUIPE", "FOLGA - VTR EM MANUTENÇÃO", "EXTRA", "EXTRA DE FALTA", "EXTRA DE ATESTADO MÉDICO", "EXTRA DE LICENÇA PRÊMIO", "EXTRA DEMAIS LICENÇAS", "J/7 FALTA DE ENFERMEIRO", "J/7 FALTA DE MÉDICO", "J/7 FALTA DE ECONDUTOR", "NÃO INFORMADO PELO SERVIDOR", "OUTROS, INFORMAR..."];
+    const ENFERMEIROS = ["DANIEL GUIMARÃES DA SILVA", "EDSON SOARES PINTO", "GEISA CAMILA MOREIRA TAVARES DE MENEZES", "GERLIVANE ALVES DE FREITAS SOUSA", "LUCIANO JOSÉ COUTINHO", "LUCIVALDO OLIVEIRA BARROSO", "MARIA DE LA PAZ PEREZ SAMPAIO", "MARINETE GOMES BARRETO", "SARA BRENDA DE SOUSA JESUS", "SHEYLA BATISTA DOS SANTOS", "GALTHAMA BRASIL", "OUTROS, INFORMAR..."];
+    const MEDICOS = ["ALEXANDRE FEITOSA DA SILVA", "CLAUDIA KLECYANNE RODRIGUES DE BRITO", "DANNIEL SILVA DA ROCHA", "FRANCISCO ELADIO CAVALCANTE", "JEFFERSON MARTINS DE LIMA", "LEIDIANA COSTA NOBLES", "MARCOS VINICIUS VERAS DA ROCHA", "ROGER MALACARNE CALEFFI", "VALTECY MENDES ALMEIDA DE ALBUQUERQUE", "CELSO EDUARDO COSTA NERY", "FELIPE LEITE BARROS", "PAULO VICTOR PAZ MACHADO", "TIAGO DE LIMA RODRIGUEZ", "OUTROS, INFORMAR..."];
+    const CONDUTORES = ["ADILSON JOSE DA SILVA BARROSO FILHO", "ANTONIO MARCOS RODRIGUES DA SILVA", "CASSIO CONRADO DIAS MENEZES", "CLEVERTTON ARAÚJO FALCÃO", "DANIEL MARTINS DA SILVA", "DELFRAN DE ALMEIDA DOS REIS", "DIONE DA SILVA BRITO", "ERNANE MORAIS DA SILVA", "EVERSON PEIXOTO DA SILVA", "FELIX DA SILVA ALMEIDA", "FRANCIVALDO RIBEIRO COSTA", "JOSE CARLOS SILVA SOUSA", "JOSE DANIEL DE PAULA FILHO", "JOSE MATÃO DA ROCHA NETO", "JULIO APOLINARIO DA SILVA", "LEANDRO CARVALHO MARQUES", "LINDOMAR ELIAS DE SOUSA", "MARCOS AURÉLIO CUNHA DA SILVA", "MARCOS DE SOUZA CRUZ", "PAULO SÉRGIO DE SOUZA LIMA", "REINAN BARBOSA SILVA", "RENATO DA CRUZ NOGUEIRA", "RICARDO ALVES DE OLIVEIRA", "RUBIÃO ANTUNES PINTO", "WAGNER SILVA DA CONCEIÇÃO", "WALYSON NOIA LOPES", "WILTON DA SILVA BISPO", "OUTROS, INFORMAR..."];
+    const TECNICOS = ["AMILTON VIANA LOPES", "ANA PATRICIA DA SILVA SOARES", "ANTONIO OTON DIAS DA SILVA", "ARLETE SILVA OLIVEIRA", "BETÂNIA SAVIA MAGALHÃES PEREIRA", "DEYRMYSSON DA SILVA SANTOS", "DOUGLAS ALBERTO QUARESMA", "DYONES CLEN AUGUSTO DE LIMA MELO", "ERONILDES FARIAS DE SOUZA", "FABIANA CARVALHO RAMOS", "FRANCISCA DO CANTO REIS", "HICARO YVES DA SILVA SANTOS", "JANETE TABOSA", "JOSUÉ SILVA DE ARRUDA", "JUCIÊ RIBEIRO COSTA", "KENNEDY PEREIRA DA SILVA", "MANOEL LUIZ DE SOUZA SANTOS", "MARIVALDA LOPES DO NASCIMENTO", "ROBERDSON PEREIRA DE ALCANTARA", "SHIRLEY LIMA DA SILVA", "TACIMAR DA SILVA PEREIRA", "MATHEUS LOPES DE MAGALHÃES", "ERLIELSON LEAO DE AMORIM", "HILDA DA SILVA LEAL", "NOEMI DOS SANTOS MARINHO NEGREIROS", "OUTROS, INFORMAR..."];
+    const EXTRAS_SUBS = ["VAGO", "NÃO INFORMADO", "SEM REGISTRO", "OUTROS, INFORMAR..."];
+
+    const MAPA_SETORES = {
+        'USA 01': { prefixo: 'usa01', campos: ['enfermeiro', 'servico_enf', 'subs_enf', 'obs_enf', 'medico', 'servico_med', 'subs_med', 'obs_med', 'condutor', 'servico_cond', 'subs_cond', 'obs_cond'] },
+        'USA 02': { prefixo: 'usa02', campos: ['enfermeiro', 'servico_enf', 'subs_enf', 'obs_enf', 'medico', 'servico_med', 'subs_med', 'obs_med', 'condutor', 'servico_cond', 'subs_cond', 'obs_cond'] },
+        'USB 01': { prefixo: 'usb01', campos: ['tec', 'servico_tec', 'subs_tec', 'obs_tec', 'condutor', 'servico_cond', 'subs_cond', 'obs_cond'] },
+        'USB 02': { prefixo: 'usb02', campos: ['tec', 'servico_tec', 'subs_tec', 'obs_tec', 'condutor', 'servico_cond', 'subs_cond', 'obs_cond'] },
+        'USB 03': { prefixo: 'usb03', campos: ['tec', 'servico_tec', 'subs_tec', 'obs_tec', 'condutor', 'servico_cond', 'subs_cond', 'obs_cond'] },
+        'USB 04': { prefixo: 'usb04', campos: ['tec', 'servico_tec', 'subs_tec', 'obs_tec', 'condutor', 'servico_cond', 'subs_cond', 'obs_cond'] },
+        'CME':    { prefixo: 'cme',   campos: ['tec', 'servico_tec', 'subs_tec', 'obs_tec'] }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        preencherListas();
+        
+        // Listener para Input e Textarea (Uppercase)
+        document.body.addEventListener('input', function(e) {
+            if ((e.target.tagName === 'INPUT' && e.target.type === 'text') || e.target.tagName === 'TEXTAREA') {
+                let start = e.target.selectionStart;
+                let end = e.target.selectionEnd;
+                e.target.value = e.target.value.toUpperCase();
+                e.target.setSelectionRange(start, end);
+            }
+        });
+
+        // Listener para SELECT "OUTROS, INFORMAR..." (Digitação)
+        document.body.addEventListener('change', function(e) {
+            if (e.target.tagName === 'SELECT') {
+                const valorSelecionado = e.target.value;
+                if (valorSelecionado.includes('OUTROS') || valorSelecionado.includes('INFORMAR')) {
+                    const textoUsuario = prompt("DIGITE A INFORMAÇÃO ESPECÍFICA:");
+                    
+                    if (textoUsuario && textoUsuario.trim() !== "") {
+                        const novaOpcao = document.createElement('option');
+                        novaOpcao.value = textoUsuario.toUpperCase();
+                        novaOpcao.text = textoUsuario.toUpperCase();
+                        novaOpcao.selected = true; 
+                        e.target.add(novaOpcao);
+                    } else {
+                        e.target.value = ""; 
+                    }
+                }
+            }
+        });
+    });
+
+    // Função para ajustar altura do textarea
+    function autoResize(el) {
+        el.style.height = 'auto'; 
+        el.style.height = el.scrollHeight + 'px';
+    }
+
+    function addOptions(select, array) {
+        let initialOption = select.querySelector('option[selected]') || select.querySelector('option[disabled]');
+        select.innerHTML = '';
+        if (initialOption) select.appendChild(initialOption.cloneNode(true));
+        array.forEach(item => {
+            let opt = document.createElement('option');
+            opt.value = item;
+            opt.innerText = item;
+            select.appendChild(opt);
+        });
+    }
+
+    function preencherListas() {
+        document.querySelectorAll('.list-servicos').forEach(sel => addOptions(sel, SERVICOS));
+        document.querySelectorAll('.list-enfermeiros').forEach(sel => addOptions(sel, ENFERMEIROS));
+        document.querySelectorAll('.list-enfermeiros-subs').forEach(sel => addOptions(sel, [...ENFERMEIROS, ...EXTRAS_SUBS]));
+        document.querySelectorAll('.list-medicos').forEach(sel => addOptions(sel, MEDICOS));
+        document.querySelectorAll('.list-medicos-subs').forEach(sel => addOptions(sel, [...MEDICOS, ...EXTRAS_SUBS]));
+        document.querySelectorAll('.list-condutores').forEach(sel => addOptions(sel, CONDUTORES));
+        document.querySelectorAll('.list-condutores-subs').forEach(sel => addOptions(sel, [...CONDUTORES, ...EXTRAS_SUBS]));
+        document.querySelectorAll('.list-tecnicos').forEach(sel => addOptions(sel, TECNICOS));
+        document.querySelectorAll('.list-tecnicos-subs').forEach(sel => addOptions(sel, [...TECNICOS, ...EXTRAS_SUBS]));
+    }
+
+    async function prepararEEnviar(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSalvar');
+        const form = document.getElementById('plantaoForm');
+
+        let inputsInvalidos = form.querySelectorAll('select:invalid, input:invalid, textarea:invalid');
+        if (inputsInvalidos.length > 0) {
+            alert('Por favor, preencha todos os campos obrigatórios.');
+            inputsInvalidos[0].focus();
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "REGISTRANDO PLANTÃO...";
+
+        let detalhesArray = [];
+        Object.keys(MAPA_SETORES).forEach(setorNome => {
+            const config = MAPA_SETORES[setorNome];
+            let dadosSetor = {
+                id: 'auto_' + config.prefixo,
+                setor: setorNome,
+                campos: {}
+            };
+            config.campos.forEach(campoSuffix => {
+                const name = `${config.prefixo}_${campoSuffix}`;
+                const input = form.querySelector(`[name="${name}"]`);
+                if (input) dadosSetor.campos[campoSuffix] = input.value;
+            });
+            detalhesArray.push(dadosSetor);
+        });
+
+        document.getElementById('plantao_detalhes_json').value = JSON.stringify(detalhesArray);
+
+        const formDataFinal = new FormData();
+        formDataFinal.append('dataPlantao', form.querySelector('[name="dataPlantao"]').value);
+        formDataFinal.append('horario', form.querySelector('[name="horario"]').value);
+        formDataFinal.append('respPreenchimento', form.querySelector('[name="respPreenchimento"]').value);
+        formDataFinal.append('coren', form.querySelector('[name="coren"]').value);
+        formDataFinal.append('plantao_detalhes_json', document.getElementById('plantao_detalhes_json').value);
+
+        const params = new URLSearchParams(formDataFinal);
+        
+        try {
+            const response = await fetch(URL_API, { method: 'POST', body: params });
+            const result = await response.json();
+
+            if (result && result.result === 'success') {
+                 alert('✅ PLANTÃO REGISTRADO COM SUCESSO!');
+                 form.reset();
+                 document.querySelectorAll('textarea').forEach(t => t.style.height = 'auto');
+                 window.scrollTo(0,0);
+            } else {
+                alert('⚠️ REGISTRO ENVIADO. Verifique a planilha.');
+            }
+        } catch (error) {
+            alert('✅ REGISTRO ENVIADO! (Status pendente de confirmação)');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "SALVAR REGISTRO OFICIAL";
+        }
+    }
+</script>
+
+</body>
+</html>
