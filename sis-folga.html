@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAMU 192 - Solicitação de Folga</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --samu-red: #ef4444; --samu-orange: #f97316; --samu-blue: #0ea5e9;
+      --bg: #f3f4f6; --card: #ffffff; --text: #1f2937;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); margin: 0; padding: 15px; font-family: 'Inter', sans-serif; }
+    .container { width: 100%; max-width: 450px; margin: 0 auto; }
+    header { background: var(--card); padding: 25px; border-radius: 16px; text-align: center; border-bottom: 4px solid var(--samu-red); box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    header h1 { font-family: 'Poppins'; font-size: 1.1rem; color: var(--samu-red); margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+    .card { background: var(--card); padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e5e7eb; }
+    .hidden { display: none; }
+    label { display: block; font-size: 0.75rem; font-weight: 700; margin: 15px 0 5px; text-transform: uppercase; color: var(--samu-blue); font-family: 'Poppins'; }
+    input, select, textarea { width: 100%; padding: 14px; border: 1px solid #d1d5db; border-radius: 8px; background: #f9fafb; font-size: 1rem; color: var(--text); outline: none; transition: 0.2s; }
+    input:focus, select:focus { border-color: var(--samu-orange); background: #fff; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+    .user-info { font-size: 0.85rem; background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid var(--samu-blue); color: #0c4a6e; font-weight: 500; }
+    .alerta-negativo { background: #fef2f2; border: 2px solid #fee2e2; border-left: 6px solid var(--samu-red); color: #991b1b; padding: 20px; border-radius: 8px; margin-bottom: 15px; text-align: center; }
+    .justificativa-texto { background: #ffffff; color: var(--samu-red); padding: 12px; border-radius: 6px; margin-top: 12px; border: 1px dashed var(--samu-red); font-weight: 700; text-transform: uppercase; font-size: 0.9rem; }
+    button { width: 100%; padding: 18px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; text-transform: uppercase; font-family: 'Poppins'; letter-spacing: 1px; }
+    .btn-login { background: var(--samu-blue); color: #fff; }
+    .btn-send { background: linear-gradient(to right, var(--samu-red), var(--samu-orange)); color: #fff; box-shadow: 0 4px 10px rgba(239,68,68,0.2); }
+    .btn-send:disabled { background: #9ca3af; box-shadow: none; opacity: 0.7; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>SAMU 192 - BOA VISTA</h1>
+    <div style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-top: 5px;">SISTEMA DE SOLICITAÇÃO DE FOLGAS</div>
+  </header>
+
+  <div id="loginSection" class="card">
+    <label>Primeiro Nome (MAIÚSCULO)</label>
+    <input type="text" id="userLogin" placeholder="EX: JOAO">
+    <label>Senha (CPF - Somente números)</label>
+    <input type="password" id="passLogin" placeholder="DIGITE O CPF">
+    <button class="btn-login" onclick="executarLogin()" id="btnLogin">ENTRAR NO SISTEMA</button>
+  </div>
+
+  <form id="formFolga" class="hidden">
+    <div id="infoLogado" class="user-info"></div>
+    
+    <div id="bloqueioMsg" class="hidden alerta-negativo">
+        <div style="font-size: 1.1rem; font-weight: 800; color: var(--samu-red);">ACESSO BLOQUEADO</div>
+        <p style="font-size: 0.85rem; margin: 10px 0;">O servidor encontra-se <b>NÃO APTO</b> para pedidos.</p>
+        <div id="textoJustificativa" class="justificativa-texto"></div>
+    </div>
+    
+    <div id="camposForm">
+        <div class="card">
+          <input type="hidden" name="action" value="solicitar">
+          <input type="hidden" name="nome" id="f_nome">
+          <input type="hidden" name="matricula" id="f_mat">
+          <input type="hidden" name="funcao" id="f_fun">
+
+          <label>Dia da Folga *</label>
+          <input type="date" name="dia_folga" required>
+
+          <label>Horário da Folga *</label>
+          <select name="horario" required>
+            <option value="" disabled selected>Selecione o turno...</option>
+            <option value="06:00 AS 12:00">06:00 AS 12:00</option>
+            <option value="12:00 AS 18:00">12:00 AS 18:00</option>
+            <option value="18:00 AS 06:00">18:00 AS 06:00</option>
+            <option value="06:00 AS 18:00">06:00 AS 18:00</option>
+          </select>
+
+          <label>Cursos do NEU em dia? *</label>
+          <select name="neu" required>
+            <option value="SIM">SIM</option>
+            <option value="NÃO">NÃO</option>
+          </select>
+
+          <label>Possui Banco de Horas? *</label>
+          <select name="banco" required>
+            <option value="SIM">SIM</option>
+            <option value="NÃO">NÃO</option>
+          </select>
+
+          <label>Motivo da Solicitação *</label>
+          <textarea name="motivo" rows="3" required placeholder="Justifique sua folga..."></textarea>
+
+          <label>Enfermeiro de Plantão Responsável *</label>
+          <select name="enfermeiro" id="selEnf" required>
+            <option value="">Carregando...</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-send" id="btnEnviar">ENVIAR SOLICITAÇÃO</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // ATENÇÃO: COLOQUE SUA URL DA API ABAIXO
+  const API_URL = "https://script.google.com/macros/s/AKfycbyyse9xCs08HFDvdDvE0Au452pWxxWWL8vWRB-t7aoZlttNgAqFDgfbf2ssMLJ69Lxm/exec";
+
+  async function executarLogin() {
+    const user = document.getElementById('userLogin').value.toUpperCase().trim();
+    const pass = document.getElementById('passLogin').value.trim();
+    const btn = document.getElementById('btnLogin');
+
+    if(!user || !pass) return alert("Preencha Nome e CPF!");
+    btn.disabled = true; btn.innerText = "AUTENTICANDO...";
+
+    try {
+      const resp = await fetch(`${API_URL}?action=login&usuario=${encodeURIComponent(user)}&senha=${encodeURIComponent(pass)}`, { method: 'POST' });
+      const data = await resp.json();
+
+      if(data.result === 'success') {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('formFolga').classList.remove('hidden');
+        
+        document.getElementById('infoLogado').innerHTML = `<b>LOGADO:</b> ${data.nome}<br><b>MATRÍCULA:</b> ${data.matricula}`;
+        document.getElementById('f_nome').value = data.nome;
+        document.getElementById('f_mat').value = data.matricula;
+        document.getElementById('f_fun').value = data.funcao;
+
+        // VERIFICA SE ESTÁ APTO
+        if(data.status === "NÃO APTO") {
+            document.getElementById('textoJustificativa').innerText = `MOTIVO: ${data.justificativa}`;
+            document.getElementById('bloqueioMsg').classList.remove('hidden');
+            document.getElementById('camposForm').classList.add('hidden');
+        } else {
+            const sel = document.getElementById('selEnf');
+            sel.innerHTML = '<option value="">Selecione o Enfermeiro...</option>';
+            data.enfermeiros.forEach(n => sel.innerHTML += `<option value="${n}">${n}</option>`);
+        }
+      } else { 
+        alert(data.message); 
+      }
+    } catch (e) { 
+      alert("Erro ao conectar com a planilha. Verifique a URL da API."); 
+    }
+    btn.disabled = false; btn.innerText = "ENTRAR NO SISTEMA";
+  }
+
+  document.getElementById('formFolga').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnEnviar');
+    btn.disabled = true; btn.innerText = "ENVIANDO SOLICITAÇÃO...";
+    try {
+      const response = await fetch(API_URL, { method: 'POST', body: new URLSearchParams(new FormData(e.target)) });
+      const res = await response.json();
+      if(res.result === 'success') {
+        alert("✅ Solicitação de folga enviada com sucesso.\n\nSua solicitação será avaliada pelo Enfermeiro Chefe de Plantão.\n\nA conferência e a responsabilidade sobre o banco de horas são exclusivamente do servidor.");
+        location.reload();
+      } else {
+        alert("Erro: " + res.message);
+      }
+    } catch (e) { alert("Erro ao salvar. Verifique sua internet."); }
+    btn.disabled = false; btn.innerText = "ENVIAR SOLICITAÇÃO";
+  };
+</script>
+</body>
+</html>
