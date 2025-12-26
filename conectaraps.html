@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+        
+    <meta charset="UTF-8">
+        
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Conecta RAPS - Boa Vista</title>
+        
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+        
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <style>
+        :root {
+            --azul-escuro: #003366;
+            --azul-claro: #00AEEF;
+            --vermelho-samu: #ED1C24;
+            --cinza: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--cinza);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ADIÇÃO: FORÇAR TEXTO EM MAIÚSCULO NOS CAMPOS */
+        input[type="text"], textarea { text-transform: uppercase; }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-top: 6px solid var(--azul-escuro);
+            width: 90%;
+        }
+
+        .container-dash {
+            max-width: 1200px;
+            width: 95%;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--azul-escuro);
+            text-align: center;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-top: 8px;
+            font-weight: 600;
+            color: var(--azul-escuro);
+            font-size: 0.9em;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: var(--azul-escuro);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--azul-claro);
+        }
+
+        .btn-gps {
+            background: var(--vermelho-samu);
+            color: white;
+            margin-top: 10px;
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .btn-back {
+            background: #666;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .user-info {
+            background: #eef7ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--azul-claro);
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8em;
+            color: #888;
+            margin-top: auto;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        #loader {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--azul-claro);
+            font-weight: 600;
+        }
+
+        .msg-pop {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .msg-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .msg-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            border-left: 5px solid var(--azul-claro);
+        }
+
+        .error-msg {
+            background: #ffe6e6;
+            color: #cc0000;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ffcccc;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.85em;
+            display: none;
+        }
+
+        .grid-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .grid-col {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-box {
+            background: var(--azul-escuro);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .chart-card {
+            background: white;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, var(--azul-escuro), var(--azul-claro));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .kpi-card h1 {
+            margin: 0;
+            color: white;
+            font-size: 2.2em;
+        }
+
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 95%;
+                margin: 10px auto;
+                padding: 15px;
+            }
+            .grid-col {
+                min-width: 100%;
+            }
+            .btn-gps {
+                width: 100%;
+            }
+            h1 { font-size: 1.5em; }
+            h2 { font-size: 1.3em; }
+        }
+
+        /* AJUSTE: TABELA COM LARGURA DINÂMICA E ROLAGEM SUAVE */
+        .table-container { overflow-x: auto; margin-top: 15px; background: white; border: 1px solid #dee2e6; border-radius: 8px; }
+        .spreadsheet-table { width: 100%; border-collapse: collapse; font-size: 0.75em; min-width: 1600px; }
+        .spreadsheet-table th { background: #f1f3f4; color: #5f6368; padding: 12px; border: 1px solid #dee2e6; text-align: left; position: sticky; top: 0; white-space: nowrap; }
+        .spreadsheet-table td { padding: 10px; border: 1px solid #dee2e6; color: #3c4043; white-space: nowrap; }
+        .spreadsheet-table tr:nth-child(even) { background-color: #f8f9fa; }
+        .spreadsheet-table tr:hover { background-color: #e8f0fe; }
+        .search-box { margin-bottom: 15px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; display: flex; gap: 10px; align-items: center; }
+        .search-box input { margin-top: 0; flex: 1; }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="login-box">
+            <h1>CONECTA RAPS</h1>
+            <div class="subtitle">Mestrado Profissional PROCISA - UFRR</div>
+            <label>Usuário (Primeiro Nome)</label>
+            <input type="text" id="user" placeholder="Ex: LUCIVALDO">
+            <label>Senha (CPF)</label>
+            <input type="password" id="pass" placeholder="Apenas números">
+            <button class="btn btn-primary" onclick="login()">ACESSAR SISTEMA</button>
+            <div id="login-error" class="error-msg">Usuário ou senha incorretos.</div>
+            <div id="loader">Verificando credenciais...</div>
+    </div>
+
+    <div class="container hidden" id="menu-box">
+            <div class="user-info" id="user-header"></div>
+            <h2>Painel Principal</h2>
+            <div id="cards">
+                    <button class="btn btn-primary" id="btn-ins" onclick="showBox('form-box')">Módulo Inserção
+                (SAMU)</button>
+                    <button class="btn btn-primary" id="btn-vis" onclick="abrirPainelVisualizacao()">Módulo Visualização
+                (RAPS)</button>
+                </div>
+            <button class="btn btn-back" onclick="location.reload()">SAIR / LOGOUT</button>
+    </div>
+
+    <div class="container hidden" id="form-box">
+            <button class="btn btn-back" style="width:auto; margin-bottom:20px;" onclick="showBox('menu-box')">⬅ Voltar
+            ao Menu</button>
+            
+            <div id="msg-reincidente" class="msg-pop msg-info">📍 Paciente reincidente! Últimos dados cadastrados foram
+            carregados.</div>
+            <div id="msg-salvo" class="msg-pop msg-success">✅ Registro salvo com sucesso!</div>
+
+            <h2>Ficha de Atendimento SAMU</h2>
+            
+            <label>Nome do Paciente</label>
+            <input type="text" id="p-nome" list="lista-nomes" placeholder="NOME COMPLETO" onblur="verificarPaciente(this.value)">
+            <datalist id="lista-nomes"></datalist>
+
+            <label>ID do Paciente</label>
+            <input type="text" id="p-id" placeholder="Gerado automaticamente" readonly>
+            
+            <div class="grid-row">
+                <div class="grid-col">
+                    <label>Data de Nascimento</label>
+                    <input type="date" id="p-nascimento" onchange="calcularIdade(this.value)">
+                </div>
+                <div class="grid-col">
+                    <label>Idade (Auto)</label>
+                    <input type="number" id="p-idade" readonly style="background: #eee;">
+                </div>
+            </div>
+
+            <div class="grid-row">
+                    <div class="grid-col"><label>Sexo</label>
+                            <select id="p-sexo">
+                    <option value="">Selecione</option>
+                    <option>Masculino</option>
+                    <option>Feminino</option>
+                </select>
+                        </div>
+                </div>
+
+            <div class="grid-row">
+                    <div class="grid-col" style="flex: 2;"><label>Endereço</label><input type="text" id="p-end"></div>
+                    <div class="grid-col"><label>Número</label><input type="text" id="p-num"></div>
+                </div>
+
+            <label>Bairro</label>
+            <select id="p-bairro" onchange="definirZona(this.value)">
+                    <option value="">Carregando bairros...</option>
+                </select>
+            
+            <label>Zona (Automática)</label>
+            <input type="text" id="p-zona" readonly style="background: #f0f0f0;"
+            placeholder="Selecione o bairro primeiro">
+            
+            <button class="btn btn-gps" onclick="getGPS()">📍 Capturar Coordenadas GPS</button>
+            <input type="text" id="p-loc" placeholder="Latitude, Longitude" readonly>
+
+            <label>Ponto de Referência</label><input type="text" id="p-ref">
+
+            <div class="grid-row">
+                    <div class="grid-col"><label>Já é Diagnosticado?</label>
+                            <select id="p-diag">
+                    <option value="">Selecione</option>
+                    <option>Não</option>
+                    <option>Sim</option>
+                </select>
+                        </div>
+                    <div class="grid-col"><label>Reincidente?</label>
+                            <select id="p-reinc">
+                    <option value="">Selecione</option>
+                    <option>Não</option>
+                    <option>Sim</option>
+                </select>
+                        </div>
+                </div>
+
+            <div class="grid-row">
+                    <div class="grid-col"><label>Utiliza Medicação?</label>
+                            <select id="p-med"
+                    onchange="document.getElementById('div-pq-med').classList.toggle('hidden', this.value === 'Sim')">
+                                    <option>Sim</option>
+                    <option>Não</option>
+                               
+                </select>
+                        </div>
+                    <div class="grid-col hidden" id="div-pq-med"><label>Se não, por quê?</label><input type="text"
+                    id="p-pq-med"></div>
+                </div>
+
+            <div class="grid-row">
+                    <div class="grid-col"><label>Tem Apoio Familiar?</label>
+                            <select id="p-fam"
+                    onchange="document.getElementById('div-pq-fam').classList.toggle('hidden', this.value === 'Sim')">
+                                    <option>Sim</option>
+                    <option>Não</option>
+                               
+                </select>
+                        </div>
+                    <div class="grid-col hidden" id="div-pq-fam"><label>Se não, por quê?</label><input type="text"
+                    id="p-pq-fam"></div>
+                </div>
+
+            <label>Tem Apoio da RAPS?</label><select id="p-raps">
+            <option>Não</option>
+            <option>Sim</option>
+        </select>
+            
+            <label>Demais Informações</label>
+            <textarea id="p-info" rows="4" placeholder="Detalhes relevantes..."></textarea>
+            
+            <button class="btn btn-primary" id="btn-salvar" onclick="salvar()">SALVAR NO BANCO DE DADOS</button>
+    </div>
+
+    <div class="container container-dash hidden" id="vis-box">
+            <button class="btn btn-back" style="width:auto; margin-bottom:20px;" onclick="showBox('menu-box')">⬅ VOLTAR
+            AO MENU</button>
+            <h2>Dashboard de Monitoramento RAPS - Boa Vista</h2>
+            <div class="subtitle">Análise Epidemiológica por Zona e Bairro</div>
+
+            <div class="grid-row">
+                    <div class="kpi-card" style="background:#003366">Atendimentos Total<h1 id="st-total">0</h1>
+            </div>
+                    <div class="kpi-card" style="background:#ED1C24">Taxa Reincidência<h1 id="st-perc-reinc">0%</h1>
+            </div>
+                    <div class="kpi-card" style="background:#00AEEF">Vínculo RAPS<h1 id="st-perc-raps">0%</h1>
+            </div>
+                </div>
+
+            <div class="grid-row">
+                    <div class="grid-col chart-card">
+                <h3>Gênero</h3><canvas id="chartSexo"></canvas>
+            </div>
+                    <div class="grid-col chart-card">
+                <h3>Faixa Etária (10 em 10 anos)</h3><canvas id="chartIdade"></canvas>
+            </div>
+                    <div class="grid-col chart-card">
+                <h3>Casos por Zona</h3><canvas id="chartZona"></canvas>
+            </div>
+                </div>
+
+            <div class="grid-row">
+                    <div class="grid-col chart-card" style="flex:2">
+                <h3>Volume por Bairro (Top 10)</h3><canvas id="chartBairros"></canvas>
+            </div>
+                    <div class="grid-col chart-card">
+                <h3>Demanda Semanal</h3><canvas id="chartTempo"></canvas>
+            </div>
+        </div>
+        <div class="grid-row">
+            <div class="grid-col chart-card">
+                <h3>Demanda Mensal (Sazonalidade)</h3><canvas id="chartMensal"></canvas>
+            </div>
+            <div class="grid-col chart-card">
+                <h3>Indicadores Clínicos (%)</h3><canvas id="chartClinico"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Espelho da Planilha: DADOS SAMU</h3>
+            <div class="search-box">
+                <span>🔍 Filtrar:</span>
+                <input type="text" id="inputFiltro" onkeyup="filtrarRegistros()" placeholder="Busque por Bairro, Zona, ID ou Data...">
+            </div>
+            <div class="table-container">
+                <table class="spreadsheet-table" id="tabelaDados">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NASCIMENTO</th>
+                            <th>SEXO</th>
+                            <th>IDADE</th>
+                            <th>BAIRRO</th>
+                            <th>ZONA</th>
+                            <th>GPS</th>
+                            <th>REFERENCIA</th>
+                            <th>DIAGNOSTICADO?</th>
+                            <th>REINCIDENTE</th>
+                            <th>UTILIZA MEDICAÇÃO?</th>
+                            <th>SE NÃO, PQ?</th>
+                            <th>TEM APOIO FAMILIAR?</th>
+                            <th>SE NÃO, PQ?</th>
+                            <th>APOIO DA RAPS?</th>
+                            <th>DEMIAS INFORMAÇÕES</th>
+                            <th>DATA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoTabela"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="chart-card"
+            style="text-align:center; background: #eef7ff; border-left: 5px solid var(--azul-claro);">
+                    <h3>📍 Integração Geográfica (QGIS)</h3>
+                    <p>Dados de Latitude e Longitude capturados (<b>Coluna I</b>) prontos para Mapa de Calor.</p>
+                </div>
+    </div>
+
+    <footer>&copy; 2025 - Lucivaldo Oliveira Barroso | Mestrado PROCISA</footer>
+
+    <script>
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwu66LoRjfqAJCmDG-MhqYyebNHmtbWcbUiASnuoKK-iCVOvN7gfIRTv_Uw2-kjS3VCzg/exec";
+        let chartsInstance = {};
+        let globalBairrosZonas = {};
+        let dadosCacheTabela = [];
+
+        window.onload = carregarBairrosDoServidor;
+
+        // ADIÇÃO: FORÇAR MAIÚSCULAS DURANTE A DIGITAÇÃO
+        document.addEventListener('input', function (e) {
+            if ((e.target.tagName === 'INPUT' && e.target.type === 'text') || e.target.tagName === 'TEXTAREA') {
+                e.target.value = e.target.value.toUpperCase();
+            }
+        });
+
+        // ADIÇÃO: CALCULAR IDADE AUTOMÁTICA
+        function calcularIdade(dataNasc) {
+            if (!dataNasc) return;
+            const hoje = new Date();
+            const nasc = new Date(dataNasc);
+            let idade = hoje.getFullYear() - nasc.getFullYear();
+            const m = hoje.getMonth() - nasc.getMonth();
+            if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) { idade--; }
+            document.getElementById('p-idade').value = idade;
+        }
+
+        async function carregarBairrosDoServidor() {
+            try {
+                const resp = await fetch(`${URL_SCRIPT}?action=carregar_lista_bairros`, { method: 'POST' });
+                const json = await resp.json();
+                
+                // Popula Bairros
+                globalBairrosZonas = json.bairros;
+                const select = document.getElementById('p-bairro');
+                select.innerHTML = '<option value="">Selecione o Bairro</option>';
+                for (let zona in globalBairrosZonas) {
+                    let group = document.createElement('optgroup'); group.label = zona;
+                    globalBairrosZonas[zona].forEach(b => {
+                        let opt = document.createElement('option'); opt.value = b; opt.text = b; group.appendChild(opt);
+                    });
+                    select.appendChild(group);
+                }
+
+                // ADIÇÃO: Popula Lista de Nomes para Autocompletar
+                const list = document.getElementById('lista-nomes');
+                json.nomes.forEach(n => {
+                    let opt = document.createElement('option'); opt.value = n; list.appendChild(opt);
+                });
+
+            } catch (e) { console.error("Erro carga inicial"); }
+        }
+
+        function definirZona(bairroSelecionado) {
+            for (let zona in globalBairrosZonas) {
+                if (globalBairrosZonas[zona].includes(bairroSelecionado)) {
+                    document.getElementById('p-zona').value = zona;
+                    break;
+                }
+            }
+        }
+
+        function showBox(id) {
+            ['login-box', 'menu-box', 'form-box', 'vis-box'].forEach(b => document.getElementById(b).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        async function login() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            const loader = document.getElementById('loader');
+            const errorDiv = document.getElementById('login-error');
+            if (!u || !p) { errorDiv.innerText = "Preencha todos os campos!"; errorDiv.style.display = "block"; return; }
+            loader.style.display = "block"; errorDiv.style.display = "none";
+            const params = new URLSearchParams({ action: 'login', usuario: u, senha: p });
+            try {
+                const resp = await fetch(`${URL_SCRIPT}?${params.toString()}`, { method: 'POST' });
+                const data = await resp.json();
+                if (data.result === 'success') {
+                    document.getElementById('user-header').innerHTML = `<b>Nome:</b> ${data.nomeCompleto}<br><b>CPF:</b> ${p} | <b>Matrícula:</b> ${data.matricula}<br><b>Função:</b> ${data.funcao} | <b>Módulo:</b> ${data.modulo}`;
+                    
+                    const mod = (data.modulo || "").toString().trim().toUpperCase();
+                    document.getElementById('btn-ins').classList.toggle('hidden', mod === "VISUALIZAÇÃO");
+                    document.getElementById('btn-vis').classList.toggle('hidden', mod === "INSERÇÃO");
+                    
+                    showBox('menu-box');
+                } else { errorDiv.innerText = data.message; errorDiv.style.display = "block"; }
+            } catch (e) { errorDiv.innerText = "Erro de conexão."; errorDiv.style.display = "block"; }
+            loader.style.display = "none";
+        }
+
+        async function verificarPaciente(nome) {
+            if (!nome) return;
+            const params = new URLSearchParams({ action: 'verificar_paciente', nome: nome });
+            try {
+                const resp = await fetch(`${URL_SCRIPT}?${params.toString()}`, { method: 'POST' });
+                const data = await resp.json();
+                if (data.result === 'exists') {
+                    document.getElementById('msg-reincidente').style.display = "block";
+                    setTimeout(() => { document.getElementById('msg-reincidente').style.display = "none"; }, 6000);
+                    const p = data.p;
+                    document.getElementById('p-id').value = p.id;
+                    document.getElementById('p-nascimento').value = p.nascimento ? new Date(p.nascimento).toISOString().split('T')[0] : "";
+                    document.getElementById('p-sexo').value = p.sexo;
+                    document.getElementById('p-idade').value = p.idade;
+                    document.getElementById('p-end').value = p.end;
+                    document.getElementById('p-num').value = p.num;
+                    document.getElementById('p-bairro').value = p.bairro;
+                    definirZona(p.bairro);
+                    document.getElementById('p-ref').value = p.ref || "";
+                    document.getElementById('p-diag').value = p.diag || "Não";
+                    document.getElementById('p-med').value = p.med || "Sim";
+                    if (p.med === "Não") {
+                        document.getElementById('div-pq-med').classList.remove('hidden');
+                        document.getElementById('p-pq-med').value = p.pq_med || "";
+                    } else { document.getElementById('div-pq-med').classList.add('hidden'); }
+                    document.getElementById('p-fam').value = p.fam || "Sim";
+                    if (p.fam === "Não") {
+                        document.getElementById('div-pq-fam').classList.remove('hidden');
+                        document.getElementById('p-pq-fam').value = p.pq_fam || "";
+                    } else { document.getElementById('div-pq-fam').classList.add('hidden'); }
+                    document.getElementById('p-raps').value = p.raps || "Não";
+                    document.getElementById('p-info').value = p.info || "";
+                    document.getElementById('p-reinc').value = "Sim";
+                }
+            } catch (e) { }
+        }
+
+        function getGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(p => {
+                    document.getElementById('p-loc').value = p.coords.latitude + ", " + p.coords.longitude;
+                });
+            }
+        }
+
+        async function abrirPainelVisualizacao() {
+            showBox('vis-box');
+            const params = new URLSearchParams({ action: 'carregar_estatisticas' });
+            try {
+                const resp = await fetch(`${URL_SCRIPT}?${params.toString()}`, { method: 'POST' });
+                const d = await resp.json();
+                document.getElementById('st-total').innerText = d.total;
+                document.getElementById('st-perc-reinc').innerText = Math.round((d.reincidentes / d.total) * 100) + "%";
+                document.getElementById('st-perc-raps').innerText = Math.round((d.clinico.raps / d.total) * 100) + "%";
+                Object.values(chartsInstance).forEach(c => c.destroy());
+                
+                chartsInstance.sexo = new Chart(document.getElementById('chartSexo'), {
+                    type: 'pie',
+                    data: { labels: ['Masc', 'Fem'], datasets: [{ data: [d.masculino, d.feminino], backgroundColor: ['#003366', '#00AEEF'] }] }
+                });
+
+                chartsInstance.idade = new Chart(document.getElementById('chartIdade'), {
+                    type: 'bar',
+                    data: { labels: Object.keys(d.idades), datasets: [{ label: 'Qtd', data: Object.values(d.idades), backgroundColor: '#ED1C24' }] }
+                });
+
+                chartsInstance.zona = new Chart(document.getElementById('chartZona'), {
+                    type: 'doughnut',
+                    data: { labels: Object.keys(d.zonas), datasets: [{ data: Object.values(d.zonas), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }] }
+                });
+
+                const sortedB = Object.entries(d.bairros).sort((a, b) => b[1] - a[1]).slice(0, 10);
+                chartsInstance.bairros = new Chart(document.getElementById('chartBairros'), {
+                    type: 'bar',
+                    data: { labels: sortedB.map(x => x[0]), datasets: [{ label: 'Casos', data: sortedB.map(x => x[1]), backgroundColor: '#003366' }] },
+                    options: { indexAxis: 'y' }
+                });
+
+                chartsInstance.tempo = new Chart(document.getElementById('chartTempo'), {
+                    type: 'line',
+                    data: { labels: Object.keys(d.dias), datasets: [{ label: 'Semanal', data: Object.values(d.dias), borderColor: '#ED1C24', tension: 0.3 }] }
+                });
+
+                chartsInstance.mensal = new Chart(document.getElementById('chartMensal'), {
+                    type: 'line',
+                    data: { labels: Object.keys(d.mensal), datasets: [{ label: 'Mensal', data: Object.values(d.mensal), borderColor: '#00AEEF', fill: true, backgroundColor: 'rgba(0, 174, 239, 0.1)', tension: 0.3 }] }
+                });
+
+                chartsInstance.clinico = new Chart(document.getElementById('chartClinico'), {
+                    type: 'radar',
+                    data: {
+                        labels: ['Diagnóstico', 'Medicação', 'Família', 'RAPS'],
+                        datasets: [{ label: '% Positivo', data: [(d.clinico.diag / d.total) * 100, (d.clinico.med / d.total) * 100, (d.clinico.fam / d.total) * 100, (d.clinico.raps / d.total) * 100], backgroundColor: 'rgba(237, 28, 36, 0.2)', borderColor: '#ED1C24' }]
+                    }
+                });
+
+                // MAPEAMENTO DAS COLUNAS: ID(0), NASC(2), SEXO(3), IDADE(4), BAIRRO(7), ZONA(8), GPS(9), REF(10), DIAG(11), REINC(12), MED(13), PQ(14), FAM(15), PQ(16), RAPS(17), INFO(18), DATA(19)
+                dadosCacheTabela = d.dadosBrutos.map(r => [r[0], r[2], r[3], r[4], r[7], r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15], r[16], r[17], r[18], r[19]]);
+                renderizarTabela(dadosCacheTabela);
+
+            } catch (e) { console.error("Erro dashboard."); }
+        }
+
+        function renderizarTabela(dados) {
+            const corpo = document.getElementById('corpoTabela');
+            corpo.innerHTML = dados.map(linha => `
+                <tr>${linha.map(celula => `<td>${celula || '-'}</td>`).join('')}</tr>
+            `).join('');
+        }
+
+        function filtrarRegistros() {
+            const termo = document.getElementById('inputFiltro').value.toLowerCase();
+            const filtrados = dadosCacheTabela.filter(linha => 
+                linha.some(valor => valor.toString().toLowerCase().includes(termo))
+            );
+            renderizarTabela(filtrados);
+        }
+
+        async function salvar() {
+            const btn = document.getElementById('btn-salvar');
+            const payload = {
+                action: 'salvar_samu',
+                id_paciente: document.getElementById('p-id').value,
+                nome: document.getElementById('p-nome').value,
+                nascimento: document.getElementById('p-nascimento').value,
+                sexo: document.getElementById('p-sexo').value,
+                idade: document.getElementById('p-idade').value,
+                endereco: document.getElementById('p-end').value,
+                numero: document.getElementById('p-num').value,
+                bairro: document.getElementById('p-bairro').value,
+                zona: document.getElementById('p-zona').value,
+                localizacao: document.getElementById('p-loc').value,
+                referencia: document.getElementById('p-ref').value,
+                diagnosticado: document.getElementById('p-diag').value,
+                reincidente: document.getElementById('p-reinc').value,
+                medicacao: document.getElementById('p-med').value,
+                pq_med: document.getElementById('p-pq-med').value,
+                apoio_fam: document.getElementById('p-fam').value,
+                porque_fam: document.getElementById('p-pq-fam').value,
+                apoio_raps: document.getElementById('p-raps').value,
+                info_extra: document.getElementById('p-info').value
+            };
+            if (!payload.nome) { alert("Nome é obrigatório!"); return; }
+            btn.disabled = true; btn.innerText = "PROCESSANDO...";
+            const params = new URLSearchParams(payload);
+            try {
+                const resp = await fetch(`${URL_SCRIPT}?${params.toString()}`, { method: 'POST' });
+                const data = await resp.json();
+                if (data.result === 'success') {
+                    const msg = document.getElementById('msg-salvo');
+                    msg.style.display = "block";
+                    window.scrollTo(0, 0);
+                    setTimeout(() => { location.reload(); }, 3000);
+                }
+            } catch (e) { btn.disabled = false; btn.innerText = "SALVAR NO BANCO DE DADOS"; }
+        }
+    </script>
+</body>
+
+</html>
