@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      padding: 10px; /* Reduzido para ganhar espaço em telas pequenas */
+      background-color: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
+      text-transform: uppercase;
+    }
+
+    .container {
+      max-width: 1000px;
+      background: white;
+      padding: 15px; /* Ajustado */
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      margin: auto;
+    }
+
+    .header-samu {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #d9534f;
+    }
+
+    .header-samu h2 { font-size: 1.5rem; } /* Responsivo */
+
+    h4 {
+      background: #d9534f;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-size: 1rem;
+    }
+
+    /* Melhoria nos botões para toque no celular */
+    .btn-tempo {
+      background: #fff;
+      border: 2px solid #d9534f;
+      color: #d9534f;
+      font-weight: bold;
+      font-size: 0.8rem;
+      padding: 12px 6px; /* Aumentado para facilitar o clique */
+      width: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 5px;
+    }
+
+    .membro-badge {
+      background: #f8f9fa;
+      padding: 10px;
+      border-left: 5px solid #d9534f;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    #camposManuais {
+      display: none;
+      background: #fff3f3;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px dashed #d9534f;
+      margin-top: 10px;
+    }
+
+    input, select {
+      text-transform: uppercase;
+      height: 45px !important; /* Altura ideal para telas touch */
+    }
+
+    /* CONFIGURAÇÃO PARA CELULARES (Telas até 768px) */
+    @media (max-width: 768px) {
+      .form-row > .col-md-2, 
+      .form-row > .col-md-3, 
+      .form-row > .col-md-4, 
+      .form-row > .col-md-6, 
+      .form-row > .col-md-7, 
+      .form-row > .col-md-8, 
+      .form-row > .col-md-9 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 10px;
+      }
+      
+      .btn-enviar {
+        font-size: 1.1rem;
+        padding: 20px;
+      }
+
+      .container {
+        padding: 10px;
+        border-radius: 0; /* Ocupa a tela toda no celular */
+      }
+    }
+  </style>
+  <title>FAPH-SAMU-BOA VISTA</title>
+</head>
+
+<body onload="carregarTudo()">
+
+  <div class="container">
+    <div class="header-samu">
+      <h2>FAPH ONLINE - SAMU 192</h2>
+      <p>Boa Vista - Roraima</p>
+    </div>
+
+    <form id="mainForm">
+      <h4>COMPOSIÇÃO DA EQUIPE</h4>
+      <div class="form-row align-items-end">
+        <div class="form-group col-md-8">
+          <label>SELECIONAR SERVIDOR</label>
+          <select id="selectServidor" class="form-control" onchange="checkOutros(this.value)">
+            <option value="">Escolha um servidor...</option>
+            <option value="OUTROS">OUTROS (Preenchimento Manual)</option>
+          </select>
+        </div>
+        <div class="form-group col-md-4">
+          <button type="button" class="btn btn-dark btn-block" onclick="addMembro()">+ ADICIONAR</button>
+        </div>
+      </div>
+      <div id="camposManuais">
+        <div class="form-row">
+          <div class="form-group col-md-4"><label>NOME</label><input type="text" id="manualNome" class="form-control">
+          </div>
+          <div class="form-group col-md-4"><label>MATRÍCULA</label><input type="text" id="manualMat"
+              class="form-control">
+          </div>
+          <div class="form-group col-md-4"><label>FUNÇÃO</label><input type="text" id="manualFuncao"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+      <div id="listaEquipeVisual" class="mt-3"></div>
+      <input type="hidden" id="equipe" class="persist">
+
+      <h4>1. IDENTIFICAÇÃO E ACIONAMENTO</h4>
+      <div class="form-row">
+        <div class="form-group col-md-3">
+          <label>UNIDADE</label>
+          <select id="unidade" class="form-control persist">
+            <option value="">CARREGANDO...</option>
+          </select>
+        </div>
+        <div class="form-group col-md-6"><label>PESQUISAR LOCAL (MAPS)</label><input type="text" id="buscaMaps"
+            class="form-control"></div>
+        <div class="form-group col-md-3">
+          <label>CÓD. ACION.</label>
+          <input list="listaCodAcion" id="codAcionamento" class="form-control persist">
+          <datalist id="listaCodAcion">
+            <option value="01">
+            <option value="02">
+          </datalist>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-6"><label>RUA</label><input type="text" id="rua" class="form-control persist">
+        </div>
+        <div class="form-group col-md-2"><label>Nº</label><input type="text" id="numero" class="form-control persist">
+        </div>
+        <div class="form-group col-md-4"><label>BAIRRO</label><input type="text" id="bairro"
+            class="form-control persist">
+        </div>
+        <input type="hidden" id="mapsLink" class="persist">
+      </div>
+
+      <div class="form-row mt-3">
+        <div class="form-group col-md-3"><button type="button" class="btn-tempo" onclick="reg('data')">📅
+            DATA</button><input type="date" id="data" class="form-control persist"></div>
+        <div class="form-group col-md-2"><button type="button" class="btn-tempo" onclick="reg('hora9')">⏱️
+            /9</button><input type="time" id="hora9" class="form-control persist"></div>
+        <div class="form-group col-md-2"><button type="button" class="btn-tempo" onclick="reg('hora10')">⏱️
+            /10</button><input type="time" id="hora10" class="form-control persist"></div>
+        <div class="form-group col-md-2"><button type="button" class="btn-tempo" onclick="reg('hora9Dest')">⏱️ /9
+            DEST</button><input type="time" id="hora9Dest" class="form-control persist"></div>
+        <div class="form-group col-md-3"><button type="button" class="btn-tempo" onclick="reg('hora10Dest')">⏱️ /10
+            DEST</button><input type="time" id="hora10Dest" class="form-control persist"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label>MOTIVO INICIAL</label>
+          <input list="listaMotivos" id="motivoInicial" class="form-control persist">
+          <datalist id="listaMotivos"></datalist>
+        </div>
+        <div class="form-group col-md-6">
+          <label>MOTIVO CONSTATADO</label>
+          <input list="listaMotivos" id="motivoConstatado" class="form-control persist">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-9">
+          <label>MÉDICO REGULADOR</label>
+          <input list="listaMedicos" id="medicoRegulador" class="form-control persist"
+            onchange="vincularCRM(this.value)">
+          <datalist id="listaMedicos"></datalist>
+        </div>
+        <div class="form-group col-md-3">
+          <label>CRM</label>
+          <input type="text" id="crmReg" class="form-control" readonly>
+        </div>
+      </div>
+
+      <h4>2. DADOS DO PACIENTE</h4>
+      <div class="form-row">
+        <div class="form-group col-md-7">
+          <label>NOME DO PACIENTE</label>
+          <input list="listaPacientes" id="paciente" class="form-control persist">
+          <datalist id="listaPacientes"></datalist>
+        </div>
+        <div class="form-group col-md-2"><label>SEXO</label><select id="sexo" class="form-control persist">
+            <option value="M">MASCULINO</option>
+            <option value="F">FEMININO</option>
+          </select></div>
+        <div class="form-group col-md-3"><label>RAÇA</label><select id="raca" class="form-control persist">
+            <option value="PARDA">PARDA</option>
+            <option value="BRANCA">BRANCA</option>
+            <option value="PRETA">PRETA</option>
+            <option value="INDÍGENA">INDÍGENA</option>
+          </select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-4"><label>DATA NASCIMENTO</label><input type="date" id="nascimento"
+            class="form-control persist" onchange="calcularIdade(this.value)"></div>
+        <div class="form-group col-md-2"><label>IDADE</label><input type="number" id="idade"
+            class="form-control persist">
+        </div>
+        <div class="form-group col-md-3">
+          <label>INÍCIO SINTOMAS</label>
+          <input list="listaSintomas" id="inicioSintomas" class="form-control persist">
+          <datalist id="listaSintomas"></datalist>
+        </div>
+        <div class="form-group col-md-3"><label>N° ACIONAMENTO</label><input type="text" id="nAcionamentoNum"
+            class="form-control persist"></div>
+      </div>
+
+      <button type="button" id="btnSubmit" class="btn btn-success btn-block btn-lg mt-4" onclick="enviarDados()">SALVAR
+        ATENDIMENTO</button>
+    </form>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbyt8u2BqAonAZCwVuUuUjNew7H97WY9s4WjCmw-ebrlA1byPIO8tC9D0965DL-lp_Ad-g/exec";
+    let dbServidores = [];
+    let dbMedicos = [];
+    let equipeList = [];
+
+    async function carregarTudo() {
+      try {
+        const respServ = await fetch(API_URL + "?action=getServidores");
+        dbServidores = await respServ.json();
+        const sel = document.getElementById('selectServidor');
+        dbServidores.forEach((s, i) => {
+          let opt = document.createElement('option');
+          opt.value = i; opt.text = s.nomeCompleto.toUpperCase(); sel.add(opt);
+        });
+
+        const respConf = await fetch(API_URL + "?action=getDadosConfig");
+        const d = await respConf.json();
+
+        // ALTERADO: PREENCHE O SELECT DE UNIDADE
+        const selUnid = document.getElementById('unidade');
+        selUnid.innerHTML = '<option value="">SELECIONE...</option>';
+        d.unidades.forEach(u => {
+          let opt = document.createElement('option');
+          opt.value = u; opt.text = u.toUpperCase();
+          selUnid.add(opt);
+        });
+
+        preencherDL("listaMotivos", d.motivos);
+        preencherDL("listaSintomas", d.inicioSintomas);
+        preencherDL("listaPacientes", d.pacientes);
+
+        dbMedicos = d.medicos;
+        preencherDL("listaMedicos", d.medicos.map(m => m.nome));
+      } catch (e) { console.error("Erro ao carregar dados"); }
+    }
+
+    function preencherDL(id, lista) {
+      const dl = document.getElementById(id);
+      dl.innerHTML = "";
+      lista.forEach(i => { let o = document.createElement('option'); o.value = i.toUpperCase(); dl.appendChild(o); });
+    }
+
+    function vincularCRM(nome) {
+      const med = dbMedicos.find(m => m.nome.toUpperCase() === nome.toUpperCase());
+      document.getElementById('crmReg').value = med ? med.crm : "";
+    }
+
+    function carregarServidores() { carregarTudo(); }
+
+    function checkOutros(val) { document.getElementById('camposManuais').style.display = (val === "OUTROS") ? "block" : "none"; }
+
+    function addMembro() {
+      let nome, mat, func;
+      const select = document.getElementById('selectServidor');
+      if (select.value === "OUTROS") {
+        nome = document.getElementById('manualNome').value.toUpperCase();
+        mat = document.getElementById('manualMat').value.toUpperCase();
+        func = document.getElementById('manualFuncao').value.toUpperCase();
+        if (!nome || !mat || !func) return alert("PREENCHA CAMPOS!");
+        document.getElementById('manualNome').value = ""; document.getElementById('manualMat').value = ""; document.getElementById('manualFuncao').value = "";
+        document.getElementById('camposManuais').style.display = "none";
+      } else if (select.value !== "") {
+        const s = dbServidores[select.value];
+        nome = s.nomeCompleto.toUpperCase(); mat = s.matricula; func = s.funcao.toUpperCase();
+      } else return;
+
+      equipeList.push(`${nome} (MAT: ${mat} - ${func})`);
+      select.value = "";
+      atualizarEquipeVisual();
+    }
+
+    function atualizarEquipeVisual() {
+      const div = document.getElementById('listaEquipeVisual');
+      div.innerHTML = "";
+      equipeList.forEach((m, i) => {
+        div.innerHTML += `<div class="membro-badge"><span>${m}</span><button type="button" class="btn btn-sm text-danger" onclick="equipeList.splice(${i},1); atualizarEquipeVisual();">&times;</button></div>`;
+      });
+      document.getElementById('equipe').value = equipeList.join(" | ");
+    }
+
+    function calcularIdade(data) {
+      if (!data) return;
+      const hoje = new Date();
+      const nasc = new Date(data);
+      let idade = hoje.getFullYear() - nasc.getFullYear();
+      if (hoje.getMonth() < nasc.getMonth() || (hoje.getMonth() === nasc.getMonth() && hoje.getDate() < nasc.getDate())) idade--;
+      document.getElementById('idade').value = idade;
+    }
+
+    function reg(id) {
+      const n = new Date();
+      if (id === 'data') document.getElementById(id).value = n.toISOString().split('T')[0];
+      else document.getElementById(id).value = n.getHours().toString().padStart(2, '0') + ":" + n.getMinutes().toString().padStart(2, '0');
+    }
+
+    async function enviarDados() {
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true; btn.innerText = "SALVANDO...";
+      const dados = {};
+
+      document.querySelectorAll('.persist').forEach(el => dados[el.id] = el.value.toUpperCase());
+
+      dados['medicoRegulador'] = document.getElementById('medicoRegulador').value.toUpperCase();
+      dados['crmReg'] = document.getElementById('crmReg').value.toUpperCase();
+
+      try {
+        const r = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "salvar", dados: dados }) });
+        const res = await r.json();
+        alert("SUCESSO! ID: " + res.id);
+        location.reload();
+      } catch (e) {
+        alert("ERRO DE CONEXÃO!");
+        btn.disabled = false;
+        btn.innerText = "SALVAR ATENDIMENTO";
+      }
+    }
+
+    function initAutocomplete() {
+      var auto = new google.maps.places.Autocomplete(document.getElementById('buscaMaps'), { componentRestrictions: { country: "br" }, fields: ["address_components", "formatted_address", "url"] });
+      auto.addListener('place_changed', function () {
+        var p = auto.getPlace();
+        document.getElementById('mapsLink').value = p.url || "";
+        p.address_components.forEach(c => {
+          if (c.types.includes("route")) document.getElementById('rua').value = c.long_name.toUpperCase();
+          if (c.types.includes("street_number")) document.getElementById('numero').value = c.long_name.toUpperCase();
+          if (c.types.includes("sublocality")) document.getElementById('bairro').value = c.long_name.toUpperCase();
+        });
+      });
+    }
+  </script>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDUnlPLEbmIXzTxGkz_TSxShxHscQ3hy94&libraries=places&callback=initAutocomplete"
+    async defer></script>
+</body>
+
+</html>
