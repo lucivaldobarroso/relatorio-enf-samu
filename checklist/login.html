@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CHECK LIST - USA</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* 
+         * DESIGN SYSTEM & VARIABLES
+         * Utiliza a paleta de cores oficial do SAMU 192
+         */
+        :root {
+            --azul-samu: #004a99;
+            --vermelho-samu: #e30613;
+            --laranja-samu: #f39200;
+            --bg: #f0f4f8;
+            --glass: rgba(255, 255, 255, 0.9);
+            --text: #333;
+        }
+
+        /* 
+         * GLOBAL STYLES & BACKGROUND 
+         * Efeito de vidro (Glassmorphism) com logo centralizada
+         */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg);
+            background-image: url('img/logo samu circulo.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-attachment: fixed;
+            background-size: 60%;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Camada de contraste para legibilidade */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(240, 244, 248, 0.85);
+            z-index: -1;
+        }
+
+        /* CONTAINER PRINCIPAL */
+        .container {
+            width: 90%;
+            max-width: 400px;
+            padding: 35px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid white;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 74, 153, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Orbitron';
+            color: var(--azul-samu);
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        /* FORMULÁRIOS E INPUTS */
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--azul-samu);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 14px;
+            background: white;
+            border: 1.5px solid #d1d9e6;
+            border-radius: 12px;
+            color: #333;
+            outline: none;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: var(--azul-samu);
+            box-shadow: 0 0 10px rgba(0, 74, 153, 0.1);
+        }
+
+        /* BOTÕES */
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--azul-samu), #0066cc);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Orbitron';
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 74, 153, 0.3);
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 74, 153, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button#btnValidar,
+        button#btnSalvar {
+            background: linear-gradient(135deg, var(--vermelho-samu), #ff3333);
+            box-shadow: 0 4px 15px rgba(227, 6, 19, 0.3);
+        }
+
+        button:disabled {
+            background: #ccc !important;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* LOADER DE SINCRONIZAÇÃO */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #e0e0e0;
+            border-top: 6px solid var(--azul-samu);
+            border-right: 6px solid var(--vermelho-samu);
+            border-bottom: 6px solid var(--laranja-samu);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loader-text {
+            font-family: 'Orbitron';
+            color: var(--azul-samu);
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .error-msg {
+            color: var(--vermelho-samu);
+            font-size: 0.85rem;
+            margin-top: 15px;
+            font-weight: 700;
+        }
+
+        .btn-voltar {
+            background: none !important;
+            border: 1.5px solid #999 !important;
+            color: #666 !important;
+            box-shadow: none !important;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">SINCRONIZANDO COM O PORTAL SAMU 192</div>
+    </div>
+
+    <div id="telaLogin" class="container">
+        <h1 style="margin-bottom:10px;">SAMU 192</h1>
+        <p style="color:var(--azul-samu); font-weight:bold; margin-bottom:25px; font-size:0.9rem;">CHECK LIST DA USA -
+            Suporte Avançado de Vida</p>
+
+        <div class="input-group">
+            <label>Viatura (VTR)</label>
+            <select id="loginVtr">
+                <option value="" disabled selected>Selecione a VTR...</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Servidor</label>
+            <select id="loginNome">
+                <option value="" disabled selected>Selecione o seu nome...</option>
+            </select>
+        </div>
+        <div id="areaDesafio" class="input-group"></div>
+        <div class="input-group">
+            <label>Senha</label>
+            <input type="password" id="loginSenha" placeholder="Digite sua senha...">
+        </div>
+        <button id="btnEntrar" onclick="entrar()">ENTRAR NO SISTEMA</button>
+        <div id="loginErro" class="error-msg"></div>
+        <p style="font-size: 0.85rem; margin-top:20px; color:#666;">Ainda não tem acesso?
+            <span style="color:var(--vermelho-samu); font-weight:bold; cursor:pointer; text-decoration: underline;"
+                onclick="mudarTela('telaCadastro')">Ative seu cadastro</span>
+        </p>
+    </div>
+
+    <div id="telaCadastro" class="container hidden">
+        <h1>ATIVAÇÃO DE ACESSO</h1>
+        <div id="camposValidacao">
+            <div class="input-group">
+                <label>Nome Completo</label>
+                <select id="cadNome">
+                    <option value="" disabled selected>Selecione seu nome...</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Cargo</label>
+                <select id="cadProf">
+                    <option value="" disabled selected>Escolha sua profissão...</option>
+                    <option>Enfermeiro</option>
+                    <option>Médico</option>
+                    <option>Técnico de Enfermagem</option>
+                    <option>Condutor</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>CPF</label>
+                <input type="text" id="cadCpf" placeholder="Digite apenas números">
+            </div>
+            <div class="input-group">
+                <label>Data de Nascimento</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="cadDia" placeholder="Dia" maxlength="2">
+                    <input type="text" id="cadMes" placeholder="Mês" maxlength="2">
+                    <input type="text" id="cadAno" placeholder="Ano" maxlength="4">
+                </div>
+            </div>
+            <button id="btnValidar" onclick="validarCadastro()">VERIFICAR INFORMAÇÕES</button>
+        </div>
+
+        <div id="camposSenha" class="hidden">
+            <div class="input-group">
+                <label>Nova Senha</label>
+                <input type="password" id="s1" placeholder="Crie uma senha forte">
+            </div>
+            <div class="input-group">
+                <label>Confirmar Senha</label>
+                <input type="password" id="s2" placeholder="Repita a senha">
+            </div>
+            <button id="btnSalvar" onclick="salvarSenha()">CONCLUIR CADASTRO</button>
+        </div>
+        <button onclick="voltarLogin()" class="btn-voltar">VOLTAR AO LOGIN</button>
+    </div>
+
+    <script>
+        /**
+         * CONFIGURAÇÃO GLOBAL
+         * URL de integração com o Google Apps Script (Backend)
+         */
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTgCrtU_YsKL8fV-CI54zMMTAZpEzMgyO7tg1UapLm2-ZCMZQ9c68U0kt-bUslWto/exec";
+
+        // Estado Global da Aplicação
+        let desafioAtual = '';
+        let linhaUser = null;
+
+        /**
+         * Controla a exibição do loader de carregamento
+         * @param {boolean} show - Se deve exibir ou ocultar
+         * @param {string} text - Texto informativo opcional
+         */
+        function toggleLoader(show, text = "") {
+            const loader = document.getElementById('loader');
+            const loaderText = loader.querySelector('.loader-text');
+            if (show) {
+                loaderText.innerText = text;
+                loader.style.display = 'flex';
+                loader.style.opacity = '1';
+            } else {
+                loader.style.opacity = '0';
+                setTimeout(() => { loader.style.display = 'none'; }, 500);
+            }
+        }
+
+        /**
+         * Wrapper unificado para chamadas ao backend
+         * @param {string} acao - Identificador da operação no GAS
+         * @param {object} dados - Dados principais para o payload
+         * @param {object} extras - Parâmetros adicionais
+         */
+        async function chamarBackend(acao, dados = {}, extras = {}) {
+            const payload = { acao: acao, dados: dados, ...extras };
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                return await response.json();
+            } catch (e) {
+                console.error("Erro na comunicação com o servidor:", e);
+                return null;
+            }
+        }
+
+        /**
+         * Inicialização da Página: Carrega dados do servidor e viaturas
+         */
+        window.onload = async () => {
+            const res = await chamarBackend('getDadosIniciais');
+            if (res) {
+                const selLogin = document.getElementById('loginNome');
+                const selCad = document.getElementById('cadNome');
+                const selVtr = document.getElementById('loginVtr');
+
+                // Popula os seletores de nomes e viaturas
+                res.nomes.forEach(n => {
+                    selLogin.add(new Option(n, n));
+                    selCad.add(new Option(n, n));
+                });
+                res.vtrs.forEach(v => selVtr.add(new Option(v, v)));
+
+                gerarDesafioAleatorio();
+                toggleLoader(false);
+            }
+        };
+
+        /**
+         * Gera um desafio de segurança baseado nos dados de nascimento
+         */
+        function gerarDesafioAleatorio() {
+            const tipos = ['dia', 'mes', 'ano'];
+            desafioAtual = tipos[Math.floor(Math.random() * tipos.length)];
+            document.getElementById('areaDesafio').innerHTML = `
+                <label>${desafioAtual.toUpperCase()} DE NASCIMENTO</label>
+                <input type="text" id="valDesafio" placeholder="Digite o ${desafioAtual}...">
+            `;
+        }
+
+        /**
+         * Alterna entre as telas de Login e Cadastro
+         */
+        function mudarTela(id) {
+            limparFormularios();
+            document.getElementById('telaLogin').classList.add('hidden');
+            document.getElementById('telaCadastro').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        /**
+         * Limpa todos os campos e estados dos formulários
+         */
+        function limparFormularios() {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => input.value = "");
+
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => select.selectedIndex = 0);
+
+            const mensagensErro = document.querySelectorAll('.error-msg');
+            mensagensErro.forEach(msg => msg.innerText = "");
+        }
+
+        /**
+         * Retorna para a tela de login resetando estados de ativação
+         */
+        function voltarLogin() {
+            document.getElementById('camposValidacao').classList.remove('hidden');
+            document.getElementById('camposSenha').classList.add('hidden');
+            mudarTela('telaLogin');
+        }
+
+        /**
+         * Processo de Autenticação principal
+         */
+        async function entrar() {
+            const btn = document.getElementById('btnEntrar');
+            const err = document.getElementById('loginErro');
+            err.innerText = "";
+
+            if (!document.getElementById('loginVtr').value || !document.getElementById('loginNome').value) {
+                alert("Selecione a VTR e seu Nome!");
+                return;
+            }
+
+            btn.disabled = true;
+            toggleLoader(true, "AUTENTICANDO NO PORTAL SAMU 192...");
+
+            const dados = {
+                vtr: document.getElementById('loginVtr').value,
+                nome: document.getElementById('loginNome').value,
+                senha: document.getElementById('loginSenha').value,
+                tipoDesafio: desafioAtual,
+                valorDesafio: document.getElementById('valDesafio').value
+            };
+
+            const res = await chamarBackend('realizarLogin', dados);
+            toggleLoader(false);
+
+            // Limpeza de segurança
+            document.getElementById('loginSenha').value = "";
+
+            if (res && res.logado) {
+                // Persiste dados na sessão local para uso no checklist
+                localStorage.setItem('usuario_samu', JSON.stringify({
+                    nome: res.nome,
+                    vtr: document.getElementById('loginVtr').value,
+                    profissao: res.profissao || "Não Informado"
+                }));
+                window.location.href = "usa.html";
+            } else {
+                btn.disabled = false;
+                err.innerText = res ? res.msg : "Falha na conexão com o servidor.";
+                gerarDesafioAleatorio();
+            }
+        }
+
+        /**
+         * Validação de identidade para ativação de acesso
+         */
+        async function validarCadastro() {
+            const btn = document.getElementById('btnValidar');
+            btn.disabled = true;
+            toggleLoader(true, "VERIFICANDO DADOS NO SISTEMA...");
+
+            const d = {
+                nome: document.getElementById('cadNome').value,
+                profissao: document.getElementById('cadProf').value,
+                cpf: document.getElementById('cadCpf').value,
+                dia: document.getElementById('cadDia').value,
+                mes: document.getElementById('cadMes').value,
+                ano: document.getElementById('cadAno').value
+            };
+
+            const res = await chamarBackend('validarIdentidadeCadastro', d);
+            toggleLoader(false);
+            btn.disabled = false;
+
+            if (res && res.sucess) {
+                linhaUser = res.row;
+                document.getElementById('camposValidacao').classList.add('hidden');
+                document.getElementById('camposSenha').classList.remove('hidden');
+            } else {
+                alert(res ? res.msg : "Erro ao validar informações.");
+            }
+        }
+
+        /**
+         * Registro de nova senha após validação bem-sucedida
+         */
+        async function salvarSenha() {
+            const btn = document.getElementById('btnSalvar');
+            const s1 = document.getElementById('s1').value;
+            const s2 = document.getElementById('s2').value;
+
+            if (s1 !== s2 || s1 === "") {
+                alert("As senhas não conferem ou estão vazias!");
+                return;
+            }
+
+            btn.disabled = true;
+            toggleLoader(true, "REGISTRANDO SUA SENHA...");
+
+            const res = await chamarBackend('registrarSenha', {}, { linha: linhaUser, senha: s1 });
+            toggleLoader(false);
+
+            if (res && res.sucess) {
+                alert(res.msg);
+                limparFormularios();
+                voltarLogin();
+            } else {
+                btn.disabled = false;
+                alert(res ? res.msg : "Erro ao salvar senha.");
+            }
+        }
+    </script>
+</body>
+
+</html>

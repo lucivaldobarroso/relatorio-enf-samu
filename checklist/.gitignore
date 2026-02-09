@@ -1,0 +1,12 @@
+# Local environment files
+.gemini/
+.agent/
+*.log
+
+# Workspace metadata
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+.DS_Store

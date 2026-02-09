@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAMU 192 - Checklist USA</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* 
+     * DESIGN SYSTEM & THEME
+     * Cores oficiais do SAMU 192 e variáveis de interface
+     */
+    :root {
+      --azul-samu: #004a99;
+      --vermelho-samu: #e30613;
+      --laranja-samu: #f39200;
+      --bg: #f0f4f8;
+      --glass: rgba(255, 255, 255, 0.9);
+      --text: #333;
+
+      /* Estados dos itens do checklist */
+      --red-soft: #ffebee;
+      --green-soft: #e8f5e9;
+      --yellow-soft: #fffde7;
+      --blue-soft: #e3f2fd;
+      --gray-soft: #f1f3f4;
+      --alert-red: #ff3333;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--bg);
+      background-image: url('img/logo samu circulo.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+      background-size: 60%;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+    }
+
+    /* Camada de contraste para legibilidade */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(240, 244, 248, 0.85);
+      z-index: -1;
+    }
+
+    /* BARRA LATERAL (SIDEBAR) */
+    #sidebar {
+      width: 280px;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+      position: relative;
+      z-index: 10;
+    }
+
+    .side-header {
+      padding: 25px;
+      background: linear-gradient(135deg, var(--azul-samu), #0066cc);
+      color: #fff;
+      font-family: 'Orbitron';
+      font-weight: bold;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .nav-btn {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      font-size: 0.9rem;
+      color: #444;
+      transition: 0.2s;
+      font-family: 'Rajdhani';
+      font-weight: 500;
+      position: relative;
+    }
+
+    .nav-btn:hover {
+      background: rgba(0, 74, 153, 0.05);
+    }
+
+    .nav-btn.active {
+      background: rgba(0, 74, 153, 0.1);
+      color: var(--azul-samu);
+      border-right: 5px solid var(--azul-samu);
+      font-weight: bold;
+    }
+
+    /* ÁREA PRINCIPAL DE CONTEÚDO */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+    }
+
+    .top-info {
+      padding: 10px 30px;
+      background: var(--glass);
+      backdrop-filter: blur(5px);
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .container {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    /* GRID DO CHECKLIST (8 COLUNAS) */
+    .item-row {
+      background: var(--glass);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 2fr repeat(6, 1fr) 1.2fr;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+      transition: transform 0.2s;
+    }
+
+    .item-row:hover {
+      transform: translateY(-2px);
+    }
+
+    .item-row.estoque-falta {
+      border: 2px solid var(--vermelho-samu);
+      background: #fff0f0;
+    }
+
+    .item-text {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--azul-samu);
+    }
+
+    .item-sub {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* COLUNAS DE INPUT */
+    .col-input {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .col-input label {
+      font-size: 0.65rem;
+      margin-bottom: 5px;
+      color: var(--azul-samu);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 8px;
+      border: 1.5px solid #d1d9e6;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1rem;
+      color: #333;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--azul-samu);
+    }
+
+    /* ESTILOS ESPECÍFICOS DE CAMPOS */
+    .in-inicio {
+      background: var(--gray-soft);
+      border: 1.5px solid transparent;
+      cursor: not-allowed;
+    }
+
+    .in-gasto {
+      background: #fff;
+      border-color: #ffcdd2;
+      color: #c62828;
+    }
+
+    .in-reposicao {
+      background: #fff;
+      border-color: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .in-inconst {
+      background: #fff;
+      border-color: #fff9c4;
+      color: #856404;
+    }
+
+    .in-excesso {
+      background: var(--blue-soft);
+      border: 1.5px solid transparent;
+      cursor: not-allowed;
+    }
+
+    /* CAIXA DE STATUS DA LINHA */
+    .status-box {
+      font-family: 'Orbitron';
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 10px 5px;
+      border-radius: 8px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .status-ok {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+    }
+
+    .status-repor {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+    }
+
+    .status-retirar {
+      background: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #bbdefb;
+    }
+
+    /* BOTÃO DE SALVAMENTO */
+    .btn-submit {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--azul-samu), #0066cc);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Orbitron';
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 20px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 15px rgba(0, 74, 153, 0.3);
+      text-transform: uppercase;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 74, 153, 0.4);
+    }
+
+    .btn-submit:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* ITENS BLOQUEADOS (CONTROLE PROFISSIONAL) */
+    .readonly-card {
+      opacity: 0.5;
+      filter: grayscale(0.5);
+      pointer-events: none;
+      position: relative;
+    }
+
+    .readonly-card::after {
+      content: '🔒 BLOQUEADO';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--vermelho-samu);
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-family: 'Orbitron';
+      font-size: 0.7rem;
+      z-index: 100;
+    }
+
+    /* BARRA DE SELEÇÃO DE TURNO */
+    .shift-bar {
+      display: flex;
+      gap: 10px;
+      padding: 5px 30px 15px 30px;
+      background: var(--glass);
+      backdrop-filter: blur(5px);
+      overflow-x: auto;
+    }
+
+    .btn-shift {
+      padding: 8px 15px;
+      border: 1.5px solid #d1d9e6;
+      background: white;
+      border-radius: 20px;
+      font-family: 'Rajdhani';
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      color: #666;
+    }
+
+    .btn-shift.active {
+      background: var(--azul-samu);
+      color: white;
+      border-color: var(--azul-samu);
+      box-shadow: 0 4px 10px rgba(0, 74, 153, 0.3);
+    }
+
+    /* BOTÕES DE SAÍDA E FERRAMENTAS */
+    .btn-sair {
+      background: none;
+      border: 1px solid var(--vermelho-samu);
+      color: var(--vermelho-samu);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-family: 'Orbitron';
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-sair:hover {
+      background: var(--vermelho-samu);
+      color: white;
+    }
+
+    /* MODAL DE BLOQUEIO / AVISOS */
+    #modalBloqueio {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 10000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 450px;
+      padding: 30px;
+      border-radius: 24px;
+      text-align: center;
+      border: 4px solid var(--vermelho-samu);
+      box-shadow: 0 0 30px rgba(227, 6, 19, 0.4);
+    }
+
+    .modal-content h2 {
+      color: var(--vermelho-samu);
+      font-family: 'Orbitron';
+      margin-bottom: 20px;
+    }
+
+    .modal-content p {
+      font-weight: 600;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .btn-escape {
+      background: #333;
+      color: white;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Orbitron';
+      font-size: 0.8rem;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    /* ESTILOS CME E ESTATÍSTICA */
+    #btnCme,
+    #btnStats {
+      background: #f39200;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 5px;
+      transition: 0.3s;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-family: 'Orbitron';
+      box-shadow: 0 4px 10px rgba(243, 146, 0, 0.3);
+    }
+
+    #btnStats {
+      background: #004a99;
+      box-shadow: 0 4px 10px rgba(0, 74, 153, 0.3);
+    }
+
+    #btnCme:hover,
+    #btnStats:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+
+    /* INDICADORES DO SIDEBAR */
+    .status-indicator {
+      position: absolute;
+      bottom: 5px;
+      left: 10%;
+      width: 80%;
+      height: 4px;
+      border-radius: 2px;
+      background: #ff4d4d;
+      transition: 0.3s;
+      display: none;
+    }
+
+    .status-indicator.complete {
+      background: #00c851;
+      box-shadow: 0 0 5px rgba(0, 200, 81, 0.5);
+    }
+
+    /* DASHBOARD ESTATÍSTICO */
+    #statsArea {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      animation: fadeIn 0.5s;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      border-top: 5px solid var(--azul-samu);
+    }
+
+    .stat-card h3 {
+      margin-bottom: 15px;
+      font-family: 'Orbitron';
+      color: var(--azul-samu);
+      font-size: 0.9rem;
+    }
+
+    .ranking-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.9rem;
+    }
+
+    /* CARDS DO PAINEL CME */
+    .cme-section-card {
+      padding: 20px;
+      border-radius: 16px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Orbitron';
+      font-size: 0.9rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .cme-section-card:hover {
+      transform: scale(1.02);
+    }
+
+    .cme-status-ok {
+      background: linear-gradient(135deg, #2e7d32, #43a047);
+    }
+
+    .cme-status-repor {
+      background: linear-gradient(135deg, #c62828, #e53935);
+    }
+
+    .cme-status-retirar {
+      background: linear-gradient(135deg, #1565c0, #1e88e5);
+    }
+
+    .cme-status-misto {
+      background: linear-gradient(135deg, #c62828, #1565c0);
+    }
+
+    .cme-info {
+      font-family: 'Rajdhani';
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 10px;
+      border-radius: 10px;
+    }
+
+    /* LOADER DE SINCRONIZAÇÃO */
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid #e0e0e0;
+      border-top: 6px solid var(--azul-samu);
+      border-right: 6px solid var(--vermelho-samu);
+      border-bottom: 6px solid var(--laranja-samu);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader-text {
+      font-family: 'Orbitron';
+      color: var(--azul-samu);
+      font-size: 0.9rem;
+      font-weight: bold;
+      text-align: center;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text">SINCRONIZANDO COM O PORTAL SAMU 192</div>
+  </div>
+
+  <div id="modalBloqueio">
+    <div class="modal-content">
+      <h2 id="modalTitulo">ACESSO BLOQUEADO</h2>
+      <p id="modalMsg">O checklist do plantão anterior não foi finalizado.</p>
+      <p id="modalInfo" style="font-size: 0.8rem; color: #666;"></p>
+      <button class="btn-escape" onclick="confirmarBypass()">REALIZAR CHECKLIST SEM REGISTRO ANTERIOR</button>
+      <button onclick="window.location.reload()"
+        style="background:none; border:none; color:var(--azul-samu); font-weight:bold; margin-top:20px; cursor:pointer; text-decoration: underline;">Tentar
+        novamente</button>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="side-header">CHECK LIST USA - SAMU 192 BOA VISTA</div>
+    <div id="sideNav" style="flex:1; overflow-y:auto;">
+      <!-- Botões de seções gerados via JS -->
+    </div>
+    <div style="padding: 20px; border-top: 1px solid rgba(0,0,0,0.05);">
+      <button class="btn-sair" onclick="sair()">🚪 SAIR DO SISTEMA</button>
+    </div>
+  </div>
+
+  <div id="main">
+    <div class="top-info">
+      <div><strong id="pNome">---</strong><br><small id="pProf">---</small></div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button id="btnCme" onclick="abrirPainelCME()">🏢 CME</button>
+        <button id="btnStats" onclick="abrirEstatisticas()">📊 ESTATÍSTICA</button>
+        <div id="pVtr" class="vtr-display">VTR: ---</div>
+      </div>
+    </div>
+
+    <div class="shift-bar">
+      <button class="btn-shift" data-turno="MANHÃ" onclick="selecionarTurno('MANHÃ')">🌅 06:00 às 12:00</button>
+      <button class="btn-shift" data-turno="TARDE" onclick="selecionarTurno('TARDE')">☀️ 12:00 às 18:00</button>
+      <button class="btn-shift" data-turno="DIA" onclick="selecionarTurno('DIA')">🕒 06:00 às 18:00</button>
+      <button class="btn-shift" data-turno="NOITE" onclick="selecionarTurno('NOITE')">🌙 18:00 às 06:00</button>
+    </div>
+
+    <div class="container">
+      <div id="cmeArea"></div>
+      <div id="statsArea"></div>
+      <div id="viewArea">
+        <h3 style="text-align:center; color:#ccc; margin-top:100px;">Selecione uma seção no menu lateral ou abra o
+          Painel CME.</h3>
+      </div>
+      <button id="btnSalvar" class="btn-submit" style="display:none;" onclick="enviar()">SALVAR ESTA SEÇÃO</button>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * CONFIGURAÇÃO E ESTADO GLOBAL
+     */
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx8r0toOFKto94Jsyx5PgEqczHzbuZxY95xqhVh0e0bJjAB8LVMGdPbxJ__zpstlfsd0w/exec";
+
+    // Dados do usuário logado e estado da sessão
+    let USER = { nome: "---", profissao: "---", vtr: "---", turno: "" };
+    let bancoItens = [];
+    let secaoAtual = "";
+    let bypassTrava = false;
+    let modoCME = false;
+
+    /**
+     * Utilitário para controle do Loader informativo
+     */
+    function toggleLoader(show, text = "") {
+      const loader = document.getElementById('loader');
+      const loaderText = loader.querySelector('.loader-text');
+      if (show) {
+        if (text) loaderText.innerText = text;
+        loader.style.display = 'flex';
+        loader.style.opacity = '1';
+      } else {
+        loader.style.opacity = '0';
+        setTimeout(() => { loader.style.display = 'none'; }, 500);
+      }
+    }
+
+    /**
+     * Finaliza a sessão e retorna ao login
+     */
+    function sair() {
+      if (confirm("Deseja realmente sair do sistema?")) {
+        localStorage.removeItem('usuario_samu');
+        window.location.href = "login.html";
+      }
+    }
+
+    /**
+     * Normaliza strings para comparação (remove acentos e espaços)
+     */
+    function normalizar(txt) {
+      if (!txt) return "";
+      return txt.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+    }
+
+    /**
+     * INICIALIZAÇÃO DA PÁGINA
+     */
+    window.onload = () => {
+      const session = localStorage.getItem('usuario_samu');
+      if (session) {
+        try {
+          const dados = JSON.parse(session);
+          USER.nome = dados.nome || "---";
+          USER.vtr = dados.vtr || "---";
+          USER.profissao = dados.profissao || "---";
+
+          const profNormal = normalizar(USER.profissao);
+
+          // Habilita funcionalidades específicas por cargo
+          if (profNormal.includes("ENFERMEIRO") || profNormal.includes("COORDENADOR") || profNormal.includes("CME") || profNormal.includes("COORD")) {
+            const btnCme = document.getElementById('btnCme');
+            if (btnCme) btnCme.style.display = 'flex';
+          }
+
+          const btnStats = document.getElementById('btnStats');
+          if (btnStats) btnStats.style.display = 'flex';
+
+          // Sugestão inteligente de turno baseada na hora local
+          const hora = new Date().getHours();
+          let turnoDetectado = "NOITE";
+          if (hora >= 6 && hora < 12) turnoDetectado = "MANHÃ";
+          else if (hora >= 12 && hora < 18) turnoDetectado = "TARDE";
+
+          const btnSugestao = document.querySelector(`.btn-shift[data-turno="${turnoDetectado}"]`);
+          if (btnSugestao) btnSugestao.style.border = "2px solid #f39200";
+
+          document.getElementById('pNome').innerText = USER.nome;
+          document.getElementById('pProf').innerText = USER.profissao;
+          document.getElementById('pVtr').innerText = "VTR: " + USER.vtr;
+
+          carregarDadosIniciais();
+        } catch (e) {
+          console.error("Erro ao processar sessão:", e);
+          window.location.href = "login.html";
+        }
+      } else {
+        window.location.href = "login.html";
+      }
+    };
+
+    /**
+     * Busca o banco de itens do servidor
+     */
+    async function carregarDadosIniciais() {
+      // Garante que o loader esteja visível se não estiver
+      toggleLoader(true, "SINCRONIZANDO ITENS...");
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            acao: 'carregarItens',
+            dados: { vtr: USER.vtr, turno: USER.turno }
+          })
+        });
+        const res = await response.json();
+        if (res.sucesso) {
+          bancoItens = res.dados;
+          montarMenu();
+          toggleLoader(false);
+
+          if (!USER.turno) {
+            document.getElementById('sideNav').style.pointerEvents = 'none';
+            document.getElementById('sideNav').style.opacity = '0.5';
+          } else {
+            liberarChecklist();
+          }
+        }
+      } catch (e) {
+        toggleLoader(true, "ERRO DE CONEXÃO COM O SERVIDOR");
+      }
+    }
+
+    /**
+     * Valida o turno selecionado e verifica pendências de plantões anteriores
+     */
+    async function selecionarTurno(turno) {
+      try {
+        USER.turno = turno;
+
+        document.querySelectorAll('.btn-shift').forEach(b => {
+          b.classList.remove('active');
+          b.style.border = "1.5px solid #d1d9e6";
+        });
+
+        const btn = document.querySelector(`.btn-shift[data-turno="${turno}"]`);
+        if (btn) {
+          btn.classList.add('active');
+          btn.style.border = "1.5px solid var(--azul-samu)";
+        }
+
+        if (modoCME) abrirPainelCME();
+
+        toggleLoader(true, "VALIDANDO PRECEDÊNCIA DE PLANTÃO...");
+
+        const precedenciaMap = {
+          "MANHÃ": ["NOITE"],
+          "TARDE": ["MANHÃ"],
+          "DIA": ["NOITE"],
+          "NOITE": ["TARDE", "DIA"]
+        };
+
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            acao: 'verificarStatusPlantao',
+            dados: { vtr: USER.vtr, profissao: USER.profissao }
+          })
+        });
+
+        const res = await response.json();
+
+        if (res.sucesso) {
+          const ultimoTurnoBanco = res.ultimoTurno;
+          const aceitos = precedenciaMap[turno] || [];
+
+          if (res.isPrimeiroRegistro || aceitos.includes(ultimoTurnoBanco)) {
+            liberarChecklist();
+            // carregarDadosIniciais já chamará o loader com sua própria mensagem
+            await carregarDadosIniciais();
+          } else {
+            toggleLoader(false);
+            const msgErro = `O turno anterior esperado era [${aceitos.join(" ou ")}], mas o último registro encontrado foi do turno [${ultimoTurnoBanco || 'NENHUM'}].`;
+            exibirBloqueio(aceitos.join("/"), msgErro, res.ultimoRegistro);
+          }
+        } else {
+          toggleLoader(false);
+          alert("Erro no servidor: " + res.msg);
+        }
+      } catch (e) {
+        toggleLoader(false);
+        alert("ERRO DE REDE: Verifique sua conexão com a internet.");
+      }
+    }
+
+    /**
+     * GESTÃO DE UI E NAVEGAÇÃO
+     */
+
+    function abrirPainelCME() {
+      if (!USER.turno) {
+        alert("Por favor, selecione seu HORÁRIO DE PLANTÃO no topo primeiro!");
+        return;
+      }
+      modoCME = true;
+      document.getElementById('viewArea').style.display = 'none';
+      document.getElementById('statsArea').style.display = 'none';
+      document.getElementById('btnSalvar').style.display = 'none';
+
+      const areaCme = document.getElementById('cmeArea');
+      areaCme.innerHTML = `<h2 style="color:var(--laranja-samu); margin-bottom: 20px; font-family:'Orbitron';">PAINEL DE RESUMO CME</h2>`;
+      areaCme.style.display = 'flex';
+      areaCme.style.flexDirection = 'column';
+      areaCme.style.gap = '10px';
+
+      const secoes = [...new Set(bancoItens.map(i => i.secao))];
+      secoes.forEach(secao => {
+        const status = calcularStatusSecaoCme(secao);
+        const card = document.createElement('div');
+        card.className = `cme-section-card ${status.classe}`;
+        card.innerHTML = `<span>${secao}</span><div class="cme-info">${status.texto}</div>`;
+        card.onclick = () => abrirSecao(secao, null);
+        areaCme.appendChild(card);
+      });
+    }
+
+    function calcularStatusSecaoCme(secao) {
+      const itens = bancoItens.filter(i => i.secao === secao);
+      let precisaRepor = false;
+      let temExcesso = false;
+
+      itens.forEach(i => {
+        const inicioEficiente = (i.inicio_vtr !== undefined && i.inicio_vtr !== null) ? i.inicio_vtr : i.padrao;
+        if (inicioEficiente < i.padrao) precisaRepor = true;
+        if (inicioEficiente > i.padrao) temExcesso = true;
+      });
+
+      if (precisaRepor && temExcesso) return { classe: 'cme-status-misto', texto: '⚠️ REPOR / RETIRAR' };
+      if (precisaRepor) return { classe: 'cme-status-repor', texto: '🔺 REPOSIÇÃO NECESSÁRIA' };
+      if (temExcesso) return { classe: 'cme-status-retirar', texto: '🔹 EXCESSO PARA RETIRAR' };
+      return { classe: 'cme-status-ok', texto: '✅ TUDO OK' };
+    }
+
+    function liberarChecklist() {
+      document.getElementById('modalBloqueio').style.display = 'none';
+      document.querySelectorAll('.item-row').forEach(r => r.classList.remove('readonly-card'));
+      document.getElementById('sideNav').style.pointerEvents = 'auto';
+      document.getElementById('sideNav').style.opacity = '1';
+      document.querySelectorAll('.status-indicator').forEach(el => el.style.display = 'block');
+    }
+
+    function exibirBloqueio(turnoAnterior, msg, infoExtra) {
+      document.getElementById('modalMsg').innerText = `O checklist do plantão anterior (${turnoAnterior}) não foi finalizado.`;
+      document.getElementById('modalInfo').innerText = infoExtra || "Nenhum registro recente encontrado.";
+      document.getElementById('modalBloqueio').style.display = 'flex';
+      document.getElementById('sideNav').style.pointerEvents = 'none';
+      document.getElementById('sideNav').style.opacity = '0.5';
+    }
+
+    function confirmarBypass() {
+      if (confirm("⚠️ ATENÇÃO: Comunique seu Chefe de Plantão para registro desta pendência. Deseja prosseguir com o checklist incompleto do antecessor?")) {
+        bypassTrava = true;
+        liberarChecklist();
+      }
+    }
+
+    /**
+     * CONSTRUÇÃO DO MENU E ÁREAS DE CHECKLIST
+     */
+
+    function montarMenu() {
+      const nav = document.getElementById('sideNav');
+      nav.innerHTML = '';
+      const secoes = [...new Set(bancoItens.map(i => i.secao))];
+
+      secoes.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        btn.innerText = s;
+
+        const indicator = document.createElement('span');
+        indicator.className = 'status-indicator';
+
+        const concluido = (bancoItens.find(i => i.secao === s && i.concluido_turno) !== undefined);
+        if (concluido) indicator.classList.add('complete');
+
+        btn.appendChild(indicator);
+        btn.onclick = () => { modoCME = false; abrirSecao(s, btn); };
+        nav.appendChild(btn);
+      });
+    }
+
+    function abrirSecao(nomeSecao, btn) {
+      if (!USER.turno) {
+        alert("Por favor, selecione seu HORÁRIO DE PLANTÃO primeiro!");
+        return;
+      }
+
+      document.getElementById('cmeArea').style.display = 'none';
+      document.getElementById('statsArea').style.display = 'none';
+      document.getElementById('viewArea').style.display = 'block';
+
+      secaoAtual = nomeSecao;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const area = document.getElementById('viewArea');
+      const itens = bancoItens.filter(i => i.secao === nomeSecao);
+      const corTitulo = modoCME ? '#f39200' : '#004a99';
+
+      area.innerHTML = `<h2 style="color:${corTitulo}; margin-bottom: 5px;">${nomeSecao} ${modoCME ? '(VISÃO CME)' : ''}</h2>`;
+
+      // Exibe histórico do último registro
+      const pItem = itens[0];
+      if (pItem && pItem.ultimo_submit) {
+        area.innerHTML += `<div style="font-size:0.75rem; color:#666; margin-bottom:15px;">🗓️ Último registro: <strong>${pItem.ultimo_submit.nome}</strong> em ${pItem.ultimo_submit.data}</div>`;
+      } else {
+        area.innerHTML += `<div style="font-size:0.75rem; color:#999; margin-bottom:15px;">⚠️ Sem registros anteriores nesta seção.</div>`;
+      }
+
+      if (modoCME) {
+        area.innerHTML += `<button onclick="abrirPainelCME()" style="background:none; border:none; color:#004a99; font-weight:bold; cursor:pointer; margin-bottom:15px;">⬅️ Voltar ao Resumo CME</button>`;
+      }
+
+      itens.forEach(i => {
+        const row = document.createElement('div');
+        const respItem = normalizar(i.responsavel);
+        const minhaProf = normalizar(USER.profissao);
+        const faltaCME = normalizar(i.estoque) === "NAO TEM";
+
+        // Filtro de responsabilidade por cargo
+        let bloqueado = false;
+        if (!modoCME) {
+          if (minhaProf === "MEDICO" && respItem === "ENFERMEIRO") bloqueado = true;
+          if (minhaProf === "ENFERMEIRO" && respItem === "MEDICO") bloqueado = true;
+        }
+
+        row.className = `item-row ${bloqueado ? 'readonly-card' : ''} ${faltaCME ? 'estoque-falta' : ''}`;
+        row.setAttribute('data-item', i.item);
+
+        const readonlyAttr = modoCME ? 'readonly' : '';
+        const inputStyle = modoCME ? 'background:#f9f9f9; border-color:#eee;' : '';
+        const valorInicio = (!isNaN(i.inicio_vtr) && i.inicio_vtr !== null) ? i.inicio_vtr : i.padrao;
+
+        row.innerHTML = `
+          <div>
+            <div class="item-text">${i.item}</div>
+            <div class="item-sub">PADRÃO: ${i.padrao}</div>
+            ${faltaCME ? '<div style="color:red; font-size:0.6rem; font-weight:bold">⚠️ INDISPONÍVEL CME</div>' : ''}
+          </div>
+          <div class="col-input"><label>Início</label><input type="number" class="in-inicio" value="${valorInicio}" readonly></div>
+          <div class="col-input"><label>Gasto</label><input type="number" class="in-gasto" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" ${readonlyAttr} style="${inputStyle}"></div>
+          <div class="col-input"><label>Repos.</label><input type="number" class="in-reposicao" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})"></div>
+          <div class="col-input"><label>Inconst.</label><input type="number" class="in-inconst" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" ${readonlyAttr} style="${inputStyle}"></div>
+          <div class="col-input"><label>Excesso</label><input type="number" class="in-excesso" placeholder="0" readonly></div>
+          <div class="col-input"><label>Retirar</label><input type="number" class="in-retirar" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" style="${inputStyle === '' ? 'border-color:#bbdefb; color:#0d47a1;' : inputStyle}"></div>
+          <div class="col-status"><div class="status-box status-ok" style="font-size:0.6rem;">OK / COMPLETO</div></div>
+        `;
+        area.appendChild(row);
+
+        setTimeout(() => processarCalculo(row.querySelector('.in-gasto'), i.padrao), 10);
+      });
+      document.getElementById('btnSalvar').style.display = 'block';
+    }
+
+    /**
+     * LÓGICA DE CÁLCULO DINÂMICO
+     */
+    function processarCalculo(el, padrao) {
+      const row = el.parentElement.parentElement;
+      const inicio = parseInt(row.querySelector('.in-inicio').value) || 0;
+      const gasto = parseInt(row.querySelector('.in-gasto').value) || 0;
+      const repos = parseInt(row.querySelector('.in-reposicao').value) || 0;
+      const retirar = parseInt(row.querySelector('.in-retirar').value) || 0;
+      const inconstRaw = row.querySelector('.in-inconst').value;
+      const inconst = inconstRaw === "" ? 0 : parseInt(inconstRaw);
+
+      const excessoField = row.querySelector('.in-excesso');
+      const statusBox = row.querySelector('.status-box');
+
+      // Se houver inconstância, ela torna-se o ponto de partida do saldo
+      const baseReal = (inconstRaw !== "") ? inconst : inicio;
+      const saldoFinal = baseReal - gasto + repos - retirar;
+
+      const excesso = saldoFinal > padrao ? saldoFinal - padrao : 0;
+      excessoField.value = excesso > 0 ? excesso : "";
+
+      if (saldoFinal < padrao) {
+        statusBox.innerText = "REPOR " + (padrao - saldoFinal);
+        statusBox.className = "status-box status-repor";
+      } else if (saldoFinal > padrao) {
+        statusBox.innerText = "RETIRAR " + excesso;
+        statusBox.className = "status-box status-retirar";
+      } else {
+        statusBox.innerText = "OK / COMPLETO";
+        statusBox.className = "status-box status-ok";
+      }
+    }
+
+    /**
+     * ENVIO DOS DADOS AO SERVIDOR
+     */
+    async function enviar() {
+      const btn = document.getElementById('btnSalvar');
+      const rows = document.querySelectorAll('.item-row:not(.readonly-card)');
+      const dadosEnvio = [];
+
+      // Ativa o loader padrão e desabilita o botão
+      toggleLoader(true, "SALVANDO NO BANCO...");
+      btn.disabled = true;
+      btn.innerText = "SALVANDO...";
+
+      rows.forEach(r => {
+        const inicio = parseInt(r.querySelector('.in-inicio').value) || 0;
+        const gasto = parseInt(r.querySelector('.in-gasto').value) || 0;
+        const repos = parseInt(r.querySelector('.in-reposicao').value) || 0;
+        const inconstRaw = r.querySelector('.in-inconst').value;
+        const retirar = parseInt(r.querySelector('.in-retirar').value) || 0;
+        const baseReal = (inconstRaw !== "") ? parseInt(inconstRaw) : inicio;
+        const saldoFinal = baseReal - gasto + repos - retirar;
+
+        dadosEnvio.push({
+          secao: secaoAtual,
+          item: r.getAttribute('data-item'),
+          inicio: inicio,
+          gasto: gasto,
+          reposicao: repos,
+          inconstancia: inconstRaw === "" ? 0 : parseInt(inconstRaw),
+          excesso: r.querySelector('.in-excesso').value || 0,
+          retirar: retirar,
+          inconsistencia_msg: r.querySelector('.status-box').innerText,
+          saldo_final: saldoFinal
+        });
+      });
+
+      try {
+        const resp = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            acao: 'salvarChecklist',
+            dados: {
+              servidor: USER.nome,
+              vtr: USER.vtr,
+              turno: USER.turno,
+              profissao: USER.profissao,
+              itens: dadosEnvio,
+              bypass_trava: bypassTrava,
+              perfil_cme: modoCME
+            }
+          })
+        });
+        const res = await resp.json();
+
+        if (res.sucesso) {
+          // Desliga o loader de salvamento para mostrar o de atualização
+          toggleLoader(false);
+          alert("Dados salvos com sucesso!");
+
+          toggleLoader(true, "ATUALIZANDO SALDOS...");
+          document.getElementById('viewArea').innerHTML = `<h3>Dados enviados. Selecione outra seção.</h3>`;
+          document.getElementById('btnSalvar').style.display = 'none';
+
+          await carregarDadosIniciais();
+          if (modoCME) abrirPainelCME();
+        } else {
+          alert("Erro ao salvar: " + res.msg);
+        }
+      } catch (e) {
+        alert("Erro ao conectar com o servidor.");
+      } finally {
+        toggleLoader(false);
+        btn.innerText = "SALVAR ESTA SEÇÃO";
+        btn.disabled = false;
+      }
+    }
+
+    /**
+     * ESTATÍSTICAS E DASHBOARD
+     */
+    async function abrirEstatisticas() {
+      if (!USER.turno) { alert("Selecione seu turno primeiro!"); return; }
+
+      const areaStats = document.getElementById('statsArea');
+      document.getElementById('viewArea').style.display = 'none';
+      document.getElementById('cmeArea').style.display = 'none';
+      document.getElementById('btnSalvar').style.display = 'none';
+
+      areaStats.style.display = 'flex';
+      toggleLoader(true, "CARREGANDO DASHBOARD ESTATÍSTICO...");
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ acao: 'obterEstatisticas', dados: { vtr: USER.vtr } })
+        });
+        const res = await response.json();
+        if (res.sucesso) {
+          renderizarEstatisticas(res.data);
+        } else {
+          areaStats.innerHTML = `<p style="color:red;">Erro ao carregar estatísticas: ${res.msg}</p>`;
+        }
+      } catch (e) {
+        areaStats.innerHTML = `<p style="color:red;">Erro na conexão.</p>`;
+      } finally {
+        toggleLoader(false);
+      }
+    }
+
+    function renderizarEstatisticas(data) {
+      const area = document.getElementById('statsArea');
+      area.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="color:var(--azul-samu); font-family:'Orbitron';">📊 DASHBOARD</h2>
+          <button onclick="window.location.reload()" style="cursor:pointer; font-weight:bold;">🏠 Voltar</button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>👷 PARTICIPAÇÃO</h3>
+            <div style="font-size:1.5rem; font-weight:bold;">
+              Enfermeiro: ${data.profissoes.ENFERMEIRO || 0}%<br>
+              Médico: ${data.profissoes.MEDICO || 0}%
+            </div>
+          </div>
+          <div class="stat-card">
+            <h3>⏰ PICOS DE ACESSO</h3>
+            <div class="ranking-list">${(data.horariosPico || []).map(h => `<div class="ranking-item"><span>${h.intervalo}h</span> <strong>${h.total}</strong></div>`).join('')}</div>
+          </div>
+          <div class="stat-card">
+            <h3>🥇 RANKING INCONSTÂNCIA</h3>
+            <div class="ranking-list">${(data.rankingInconst || []).map((p, i) => `<div class="ranking-item"><span>${i + 1}º ${p.nome}</span> <strong>${p.total}</strong></div>`).join('')}</div>
+          </div>
+          <div class="stat-card">
+            <h3>🕵️ RASTREIO ANTECESSOR</h3>
+            <div class="ranking-list">${(data.rastroAntecessor || []).map(r => `<div class="ranking-item"><span>${r.reclamante}</span> ➔ <strong>${r.antecessor}</strong></div>`).join('')}</div>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+
+</html>
