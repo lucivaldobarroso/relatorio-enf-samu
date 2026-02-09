@@ -234,6 +234,11 @@
       cursor: not-allowed;
     }
 
+    /* Container para permitir grid de 8 colunas no desktop e agrupamento no mobile */
+    .inputs-grid {
+      display: contents;
+    }
+
     /* CAIXA DE STATUS DA LINHA */
     .status-box {
       font-family: 'Orbitron';
@@ -612,7 +617,7 @@
     }
 
     /* RESPONSIVIDADE MOBILE / TABLET */
-    @media (max-width: 900px) {
+    @media (max-width: 768px) {
       body {
         flex-direction: column;
       }
@@ -1077,7 +1082,7 @@
         btn.onclick = () => {
           modoCME = false;
           abrirSecao(s, btn);
-          if (window.innerWidth <= 900) toggleSidebar();
+          if (window.innerWidth <= 768) toggleSidebar();
         };
         nav.appendChild(btn);
       });
