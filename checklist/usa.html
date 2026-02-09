@@ -596,6 +596,133 @@
       text-align: center;
       padding: 0 20px;
     }
+
+    /* BOTÃO MENU MOBILE (HAMBURGER) */
+    .menu-toggle {
+      display: none;
+      background: var(--azul-samu);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 1000;
+      font-size: 1.2rem;
+      margin-right: 15px;
+    }
+
+    /* RESPONSIVIDADE MOBILE / TABLET */
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      #sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        transition: left 0.3s ease;
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+      }
+
+      #sidebar.open {
+        left: 0;
+      }
+
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9;
+      }
+
+      .overlay.active {
+        display: block;
+      }
+
+      .top-info {
+        padding: 8px 15px;
+      }
+
+      .shift-bar {
+        padding: 5px 15px 15px 15px;
+      }
+
+      .container {
+        padding: 10px;
+      }
+
+      /* REDESENHO DA TABELA DE ITENS (ITEM-ROW) NO MOBILE */
+      .item-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 20px;
+        border-radius: 16px;
+      }
+
+      .item-text {
+        font-size: 1.1rem;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+
+      .item-sub {
+        text-align: center;
+        font-size: 0.8rem;
+      }
+
+      /* Grid interno para os campos numéricos */
+      .inputs-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      /* No mobile, vamos envolver os inputs em um container específico para grid */
+      .col-input {
+        width: 100%;
+      }
+
+      input {
+        padding: 10px 5px;
+        font-size: 0.9rem;
+      }
+
+      .col-status {
+        margin-top: 10px;
+      }
+
+      .status-box {
+        font-size: 0.8rem !important;
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .inputs-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .top-info {
+        font-size: 0.8rem;
+      }
+
+      #pVtr {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+      }
+    }
   </style>
 </head>
 
@@ -605,6 +732,8 @@
     <div class="spinner"></div>
     <div class="loader-text">SINCRONIZANDO COM O PORTAL SAMU 192</div>
   </div>
+
+  <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
 
   <div id="modalBloqueio">
     <div class="modal-content">
@@ -630,7 +759,10 @@
 
   <div id="main">
     <div class="top-info">
-      <div><strong id="pNome">---</strong><br><small id="pProf">---</small></div>
+      <div style="display:flex; align-items:center;">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div><strong id="pNome">---</strong><br><small id="pProf">---</small></div>
+      </div>
       <div style="display:flex; align-items:center; gap:10px;">
         <button id="btnCme" onclick="abrirPainelCME()">🏢 CME</button>
         <button id="btnStats" onclick="abrirEstatisticas()">📊 ESTATÍSTICA</button>
@@ -668,6 +800,13 @@
     let secaoAtual = "";
     let bypassTrava = false;
     let modoCME = false;
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
 
     /**
      * Utilitário para controle do Loader informativo
@@ -935,7 +1074,11 @@
         if (concluido) indicator.classList.add('complete');
 
         btn.appendChild(indicator);
-        btn.onclick = () => { modoCME = false; abrirSecao(s, btn); };
+        btn.onclick = () => {
+          modoCME = false;
+          abrirSecao(s, btn);
+          if (window.innerWidth <= 900) toggleSidebar();
+        };
         nav.appendChild(btn);
       });
     }
@@ -998,12 +1141,14 @@
             <div class="item-sub">PADRÃO: ${i.padrao}</div>
             ${faltaCME ? '<div style="color:red; font-size:0.6rem; font-weight:bold">⚠️ INDISPONÍVEL CME</div>' : ''}
           </div>
-          <div class="col-input"><label>Início</label><input type="number" class="in-inicio" value="${valorInicio}" readonly></div>
-          <div class="col-input"><label>Gasto</label><input type="number" class="in-gasto" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" ${readonlyAttr} style="${inputStyle}"></div>
-          <div class="col-input"><label>Repos.</label><input type="number" class="in-reposicao" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})"></div>
-          <div class="col-input"><label>Inconst.</label><input type="number" class="in-inconst" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" ${readonlyAttr} style="${inputStyle}"></div>
-          <div class="col-input"><label>Excesso</label><input type="number" class="in-excesso" placeholder="0" readonly></div>
-          <div class="col-input"><label>Retirar</label><input type="number" class="in-retirar" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" style="${inputStyle === '' ? 'border-color:#bbdefb; color:#0d47a1;' : inputStyle}"></div>
+          <div class="inputs-grid">
+            <div class="col-input"><label>Início</label><input type="number" class="in-inicio" value="${valorInicio}" readonly></div>
+            <div class="col-input"><label>Gasto</label><input type="number" class="in-gasto" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" ${readonlyAttr} style="${inputStyle}"></div>
+            <div class="col-input"><label>Repos.</label><input type="number" class="in-reposicao" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})"></div>
+            <div class="col-input"><label>Inconst.</label><input type="number" class="in-inconst" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" ${readonlyAttr} style="${inputStyle}"></div>
+            <div class="col-input"><label>Excesso</label><input type="number" class="in-excesso" placeholder="0" readonly></div>
+            <div class="col-input"><label>Retirar</label><input type="number" class="in-retirar" placeholder="0" onfocus="this.select()" oninput="processarCalculo(this, ${i.padrao})" style="${inputStyle === '' ? 'border-color:#bbdefb; color:#0d47a1;' : inputStyle}"></div>
+          </div>
           <div class="col-status"><div class="status-box status-ok" style="font-size:0.6rem;">OK / COMPLETO</div></div>
         `;
         area.appendChild(row);
