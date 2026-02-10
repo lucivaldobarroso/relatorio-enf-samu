@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -725,6 +725,7 @@
     @media (max-width: 768px) {
       body {
         flex-direction: column;
+        height: 100dvh;
       }
 
       .menu-toggle {
@@ -762,10 +763,18 @@
 
       .top-info {
         padding: 8px 15px;
+        gap: 10px;
+        flex-wrap: wrap;
       }
 
       .shift-bar {
         padding: 5px 15px 15px 15px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .btn-shift {
+        min-width: 170px;
       }
 
       .container {
@@ -819,6 +828,21 @@
       }
     }
 
+    @media (max-width: 1024px) {
+      body {
+        background-size: 85%;
+      }
+
+      .top-info>div:last-child {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .vtr-display {
+        white-space: nowrap;
+      }
+    }
+
     /* TABELA DE HISTÓRICO MELHORADA */
     .history-card {
       background: white;
@@ -867,7 +891,8 @@
     }
 
     /* MODAL PARABÉNS */
-    #modalParabens {
+    #modalParabens,
+    #modalSucesso {
       position: fixed;
       top: 0;
       left: 0;
@@ -985,19 +1010,60 @@
         style="background:var(--azul-samu); color:white; border:none; padding:15px 30px; border-radius:10px; font-weight:bold; cursor:pointer;">FECHAR</button>
     </div>
   </div>
+  <div id="modalSucesso">
+    <div class="parabens-content">
+      <div class="parabens-icon">&#9989;</div>
+      <h2 style="color:var(--azul-samu); font-family:'Orbitron';">SUCESSO!</h2>
+      <p style="font-size: 1.2rem; margin: 20px 0;">Dados salvos com sucesso!</p>
+      <button onclick="document.getElementById('modalSucesso').style.display='none'"
+        style="background:var(--azul-samu); color:white; border:none; padding:15px 30px; border-radius:10px; font-weight:bold; cursor:pointer;">OK</button>
+    </div>
+  </div>
 
   <script>
     /**
      * CONFIGURAÇÃO E ESTADO GLOBAL
      */
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx8r0toOFKto94Jsyx5PgEqczHzbuZxY95xqhVh0e0bJjAB8LVMGdPbxJ__zpstlfsd0w/exec";
+    const SCRIPT_URL_FALLBACK = "https://script.google.com/macros/s/AKfycbyTgCrtU_YsKL8fV-CI54zMMTAZpEzMgyO7tg1UapLm2-ZCMZQ9c68U0kt-bUslWto/exec";
 
     // Dados do usuário logado e estado da sessão
     let USER = { nome: "---", profissao: "---", vtr: "---", turno: "" };
     let bancoItens = [];
+    let bancoItensPorItem = new Map();
+    let enterNoInputRegistrado = false;
     let secaoAtual = "";
     let bypassTrava = false;
     let modoCME = false;
+
+    async function postComFallback(payload) {
+      const urls = [SCRIPT_URL, SCRIPT_URL_FALLBACK];
+      let ultimoErro = null;
+      const hasAbortController = typeof AbortController !== 'undefined';
+
+      for (const url of urls) {
+        const controller = hasAbortController ? new AbortController() : null;
+        const timeoutId = setTimeout(() => {
+          if (controller) controller.abort();
+        }, 15000);
+        try {
+          const options = {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          };
+          if (controller) options.signal = controller.signal;
+
+          const response = await fetch(url, options);
+          clearTimeout(timeoutId);
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return await response.json();
+        } catch (e) {
+          clearTimeout(timeoutId);
+          ultimoErro = e;
+        }
+      }
+      throw ultimoErro || new Error("Falha na comunicação com o servidor.");
+    }
 
     // Definição dos turnos e horários (24h)
     const SHIFTS = {
@@ -1096,6 +1162,13 @@
           document.getElementById('pProf').innerText = USER.profissao;
           document.getElementById('pVtr').innerText = "VTR: " + USER.vtr;
 
+          if (!enterNoInputRegistrado) {
+            document.getElementById('viewArea').addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT') enviar();
+            });
+            enterNoInputRegistrado = true;
+          }
+
           atualizarStatusTurnos();
           carregarDadosIniciais();
 
@@ -1117,16 +1190,13 @@
       // Garante que o loader esteja visível se não estiver
       toggleLoader(true, "SINCRONIZANDO ITENS...");
       try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            acao: 'carregarItens',
-            dados: { vtr: USER.vtr, turno: USER.turno }
-          })
+        const res = await postComFallback({
+          acao: 'carregarItens',
+          dados: { vtr: USER.vtr, turno: USER.turno }
         });
-        const res = await response.json();
         if (res.sucesso) {
           bancoItens = res.dados;
+          bancoItensPorItem = new Map(bancoItens.map(i => [i.item, i]));
           montarMenu();
           toggleLoader(false);
 
@@ -1138,7 +1208,12 @@
           }
         }
       } catch (e) {
-        toggleLoader(true, "ERRO DE CONEXÃO COM O SERVIDOR");
+        toggleLoader(false);
+        const area = document.getElementById('historicoArea');
+        if (area) {
+          area.innerHTML = '<p style="text-align:center; color:#c62828; margin-top:20px; font-weight:700;">Falha na conexão com o servidor. Verifique a internet e recarregue a página.</p>';
+          area.style.display = 'block';
+        }
       }
     }
 
@@ -1202,15 +1277,10 @@
 
         toggleLoader(true, "ABRINDO TURNO E CARREGANDO DADOS...");
 
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            acao: 'verificarStatusPlantao',
-            dados: { vtr: USER.vtr, profissao: USER.profissao, turnoSelecionado: turno }
-          })
+        const res = await postComFallback({
+          acao: 'verificarStatusPlantao',
+          dados: { vtr: USER.vtr, profissao: USER.profissao, turnoSelecionado: turno }
         });
-
-        const res = await response.json();
 
         if (res.sucesso) {
           liberarChecklist();
@@ -1218,11 +1288,7 @@
 
           let hist = res.ultimosRegistrosGerais;
           if (!hist || hist.length === 0) {
-            const respH = await fetch(SCRIPT_URL, {
-              method: 'POST',
-              body: JSON.stringify({ acao: 'obterHistoricoRecente', dados: { vtr: USER.vtr } })
-            });
-            const resH = await respH.json();
+            const resH = await postComFallback({ acao: 'obterHistoricoRecente', dados: { vtr: USER.vtr } });
             if (resH.sucesso) hist = resH.dados;
           }
           renderizarHistoricoRecente(hist);
@@ -1483,6 +1549,7 @@
         area.innerHTML += `<button onclick="abrirPainelCME()" style="background:none; border:none; color:#004a99; font-weight:bold; cursor:pointer; margin-bottom:15px;">⬅️ Voltar ao Resumo CME</button>`;
       }
 
+      const fragment = document.createDocumentFragment();
       itens.forEach(i => {
         const row = document.createElement('div');
         const respItem = normalizar(i.responsavel);
@@ -1528,17 +1595,10 @@
           <div class="col-status"><div class="status-box status-ok" style="font-size:0.6rem;">OK / COMPLETO</div></div>
         `;
 
-        // Suporte ao botão Enter em todos os inputs da linha para salvar
-        row.querySelectorAll('input').forEach(inp => {
-          inp.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') enviar();
-          });
-        });
-
-        area.appendChild(row);
-
-        setTimeout(() => processarCalculo(row.querySelector('.in-gasto'), i.padrao), 10);
+        fragment.appendChild(row);
+        processarCalculo(row.querySelector('.in-gasto'), i.padrao);
       });
+      area.appendChild(fragment);
       document.getElementById('btnSalvar').style.display = 'block';
     }
 
@@ -1618,26 +1678,28 @@
       });
 
       try {
-        const resp = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            acao: 'salvarChecklist',
-            dados: {
-              servidor: USER.nome,
-              vtr: USER.vtr,
-              turno: USER.turno,
-              profissao: USER.profissao,
-              itens: dadosEnvio,
-              bypass_trava: bypassTrava,
-              perfil_cme: modoCME
-            }
-          })
+        const res = await postComFallback({
+          acao: 'salvarChecklist',
+          dados: {
+            servidor: USER.nome,
+            vtr: USER.vtr,
+            turno: USER.turno,
+            profissao: USER.profissao,
+            itens: dadosEnvio,
+            bypass_trava: bypassTrava,
+            perfil_cme: modoCME
+          }
         });
-        const res = await resp.json();
 
         if (res.sucesso) {
           toggleLoader(false);
-          alert("Dados salvos com sucesso!");
+          setTimeout(() => {
+            const modalSucesso = document.getElementById('modalSucesso');
+            modalSucesso.style.display = 'flex';
+            setTimeout(() => {
+              modalSucesso.style.display = 'none';
+            }, 3000);
+          }, 550);
 
           // --- NOVO COMPORTAMENTO DE "RESET" PARA SEÇÃO TODA ---
           rows.forEach(r => {
@@ -1661,7 +1723,7 @@
 
             // Atualiza status box
             const itName = r.getAttribute('data-item');
-            const padVal = bancoItens.find(bi => bi.item === itName)?.padrao || 0;
+            const padVal = bancoItensPorItem.get(itName)?.padrao || 0;
             processarCalculo(r.querySelector('.in-gasto'), padVal);
           });
 
@@ -1711,22 +1773,18 @@
       btnEl.innerText = "ENVIANDO...";
 
       try {
-        const resp = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            acao: 'salvarChecklist',
-            dados: {
-              servidor: USER.nome,
-              vtr: USER.vtr,
-              turno: USER.turno,
-              profissao: USER.profissao,
-              itens: [dado],
-              bypass_trava: bypassTrava,
-              perfil_cme: modoCME
-            }
-          })
+        const res = await postComFallback({
+          acao: 'salvarChecklist',
+          dados: {
+            servidor: USER.nome,
+            vtr: USER.vtr,
+            turno: USER.turno,
+            profissao: USER.profissao,
+            itens: [dado],
+            bypass_trava: bypassTrava,
+            perfil_cme: modoCME
+          }
         });
-        const res = await resp.json();
 
         if (res.sucesso) {
           row.classList.add('item-enviado-ok'); // Classe para ficar verde
@@ -1746,7 +1804,7 @@
           row.querySelector('.in-retirar').value = "";
 
           // 3. Recalculamos o status box para mostrar "OK" (já que o novo início resolve a pendência)
-          const padraoItem = bancoItens.find(bi => bi.item === nomeItem)?.padrao || 0;
+          const padraoItem = bancoItensPorItem.get(nomeItem)?.padrao || 0;
           processarCalculo(row.querySelector('.in-gasto'), padraoItem);
 
           // Verifica se todos itens da seção agora estão ok para atualizar sidebar
@@ -1794,11 +1852,7 @@
       toggleLoader(true, "CARREGANDO DASHBOARD ESTATÍSTICO...");
 
       try {
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({ acao: 'obterEstatisticas', dados: { vtr: USER.vtr } })
-        });
-        const res = await response.json();
+        const res = await postComFallback({ acao: 'obterEstatisticas', dados: { vtr: USER.vtr } });
         if (res.sucesso) {
           renderizarEstatisticas(res.data);
         } else {
@@ -1913,3 +1967,8 @@
 </body>
 
 </html>
+
+
+
+
+

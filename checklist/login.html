@@ -385,7 +385,7 @@
          */
         window.onload = async () => {
             const res = await chamarBackend('getDadosIniciais');
-            if (res) {
+            if (res && Array.isArray(res.nomes) && Array.isArray(res.vtrs)) {
                 const selLogin = document.getElementById('loginNome');
                 const selCad = document.getElementById('cadNome');
                 const selVtr = document.getElementById('loginVtr');
@@ -404,8 +404,11 @@
                     if (e.key === 'Enter') entrar();
                 });
 
-                toggleLoader(false);
+            } else {
+                const err = document.getElementById('loginErro');
+                err.innerText = "Falha ao carregar dados iniciais. Verifique a internet e recarregue a página.";
             }
+            toggleLoader(false);
         };
 
         /**

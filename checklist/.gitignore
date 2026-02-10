@@ -3,6 +3,12 @@
 .agent/
 *.log
 
+# Dependencies
+node_modules/
+dist/
+build/
+.vite/
+
 # Workspace metadata
 .vscode/
 .idea/
