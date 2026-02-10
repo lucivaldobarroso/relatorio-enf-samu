@@ -298,6 +298,32 @@
       cursor: not-allowed;
     }
 
+    /* BOTÃO ENVIAR ITEM INDIVIDUAL */
+    .btn-enviar-item {
+      background: #f1f3f4;
+      border: 1px solid #d1d9e6;
+      color: var(--azul-samu);
+      font-family: 'Rajdhani';
+      font-weight: 700;
+      font-size: 0.65rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .btn-enviar-item:hover {
+      background: var(--azul-samu);
+      color: white;
+    }
+
+    .item-enviado-ok {
+      background: #f0fff4 !important;
+      border: 1px solid #4caf50 !important;
+      box-shadow: inset 0 0 10px rgba(76, 175, 80, 0.05);
+    }
+
     /* ITENS BLOQUEADOS (CONTROLE PROFISSIONAL) */
     .readonly-card {
       opacity: 0.5;
@@ -329,10 +355,20 @@
       background: var(--glass);
       backdrop-filter: blur(5px);
       overflow-x: auto;
+      position: relative;
+      z-index: 1;
     }
 
+    /* STATUS DOS TURNOS */
     .btn-shift {
-      padding: 8px 15px;
+      position: relative;
+      padding: 15px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 140px;
+      transition: all 0.3s;
       border: 1.5px solid #d1d9e6;
       background: white;
       border-radius: 20px;
@@ -341,15 +377,32 @@
       font-size: 0.8rem;
       cursor: pointer;
       white-space: nowrap;
-      transition: all 0.2s;
       color: #666;
     }
 
-    .btn-shift.active {
+    .shift-label {
+      font-size: 0.6rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    .label-atual {
       background: var(--azul-samu);
       color: white;
-      border-color: var(--azul-samu);
-      box-shadow: 0 4px 10px rgba(0, 74, 153, 0.3);
+    }
+
+    .label-terminando {
+      background: var(--laranja-samu);
+      color: white;
+    }
+
+    .btn-shift:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: grayscale(1);
     }
 
     /* BOTÕES DE SAÍDA E FERRAMENTAS */
@@ -489,18 +542,70 @@
     }
 
     .stat-card {
-      background: white;
+      background: var(--glass);
+      backdrop-filter: blur(10px);
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 16px;
+      border: 1.5px solid white;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      border-top: 5px solid var(--azul-samu);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 74, 153, 0.1);
     }
 
     .stat-card h3 {
-      margin-bottom: 15px;
+      margin: 0;
+      font-family: 'Orbitron';
+      font-size: 0.8rem;
+      color: var(--azul-samu);
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 800;
       font-family: 'Orbitron';
       color: var(--azul-samu);
-      font-size: 0.9rem;
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge-green {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-yellow {
+      background: #fffde7;
+      color: #f57f17;
+    }
+
+    .badge-red {
+      background: #ffebee;
+      color: #c62828;
     }
 
     .ranking-item {
@@ -714,18 +819,87 @@
       }
     }
 
-    @media (max-width: 480px) {
-      .inputs-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    /* TABELA DE HISTÓRICO MELHORADA */
+    .history-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      overflow-x: auto;
+    }
 
-      .top-info {
-        font-size: 0.8rem;
-      }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.85rem;
+    }
 
-      #pVtr {
-        font-size: 0.8rem;
-        padding: 5px 10px;
+    .history-table th,
+    .history-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .history-table th {
+      color: var(--azul-samu);
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+
+    .section-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+
+    .dot-done {
+      background: #4caf50;
+    }
+
+    .dot-pending {
+      background: #f44336;
+    }
+
+    /* MODAL PARABÉNS */
+    #modalParabens {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      backdrop-filter: blur(5px);
+    }
+
+    .parabens-content {
+      background: white;
+      padding: 40px;
+      border-radius: 30px;
+      text-align: center;
+      max-width: 400px;
+      border: 4px solid var(--azul-samu);
+    }
+
+    .parabens-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+
+      .history-table th:nth-child(3),
+      .history-table td:nth-child(3) {
+        display: none;
       }
     }
   </style>
@@ -775,21 +949,40 @@
       </div>
     </div>
 
-    <div class="shift-bar">
-      <button class="btn-shift" data-turno="MANHÃ" onclick="selecionarTurno('MANHÃ')">🌅 06:00 às 12:00</button>
-      <button class="btn-shift" data-turno="TARDE" onclick="selecionarTurno('TARDE')">☀️ 12:00 às 18:00</button>
-      <button class="btn-shift" data-turno="DIA" onclick="selecionarTurno('DIA')">🕒 06:00 às 18:00</button>
-      <button class="btn-shift" data-turno="NOITE" onclick="selecionarTurno('NOITE')">🌙 18:00 às 06:00</button>
+    <div class="shift-bar" id="shiftBar">
+      <button class="btn-shift" data-turno="MANHÃ" onclick="selecionarTurno('MANHÃ')">
+        <span>🌅 06:00 às 12:00</span>
+      </button>
+      <button class="btn-shift" data-turno="TARDE" onclick="selecionarTurno('TARDE')">
+        <span>☀️ 12:00 às 18:00</span>
+      </button>
+      <button class="btn-shift" data-turno="DIA" onclick="selecionarTurno('DIA')">
+        <span>🕒 06:00 às 18:00</span>
+      </button>
+      <button class="btn-shift" data-turno="NOITE" onclick="selecionarTurno('NOITE')">
+        <span>🌙 18:00 às 06:00</span>
+      </button>
     </div>
 
     <div class="container">
       <div id="cmeArea"></div>
       <div id="statsArea"></div>
+      <div id="historicoArea"></div>
       <div id="viewArea">
-        <h3 style="text-align:center; color:#ccc; margin-top:100px;">Selecione uma seção no menu lateral ou abra o
-          Painel CME.</h3>
+        <h3 style="text-align:center; color:#ccc; margin-top:100px;">Selecione uma seção no menu lateral para iniciar o
+          checklist.</h3>
       </div>
-      <button id="btnSalvar" class="btn-submit" style="display:none;" onclick="enviar()">SALVAR ESTA SEÇÃO</button>
+      <button id="btnSalvar" class="btn-submit" style="display:none;" onclick="enviar()">ENVIAR TODA A SEÇÃO</button>
+    </div>
+  </div>
+
+  <div id="modalParabens">
+    <div class="parabens-content">
+      <div class="parabens-icon">🎉</div>
+      <h2 style="color:var(--azul-samu); font-family:'Orbitron';">PARABÉNS!</h2>
+      <p style="font-size: 1.2rem; margin: 20px 0;">Você completou todo o seu check list com sucesso!</p>
+      <button onclick="document.getElementById('modalParabens').style.display='none'"
+        style="background:var(--azul-samu); color:white; border:none; padding:15px 30px; border-radius:10px; font-weight:bold; cursor:pointer;">FECHAR</button>
     </div>
   </div>
 
@@ -805,6 +998,26 @@
     let secaoAtual = "";
     let bypassTrava = false;
     let modoCME = false;
+
+    // Definição dos turnos e horários (24h)
+    const SHIFTS = {
+      "MANHÃ": { start: 6, end: 12 },
+      "TARDE": { start: 12, end: 18 },
+      "DIA": { start: 6, end: 18 },
+      "NOITE": { start: 18, end: 6 } // Atravessa a meia-noite
+    };
+
+    /**
+     * Obtém o horário atual de Boa Vista (UTC-4)
+     */
+    function getBoaVistaTime() {
+      const now = new Date();
+      // Converte para o timezone America/Boa_Vista
+      const options = { timeZone: 'America/Boa_Vista', hour12: false, hour: 'numeric', minute: 'numeric', second: 'numeric' };
+      const [h, m, s] = now.toLocaleTimeString('pt-BR', options).split(':').map(Number);
+      const bvDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Boa_Vista' }));
+      return { hour: h, minute: m, date: bvDate };
+    }
 
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
@@ -883,7 +1096,11 @@
           document.getElementById('pProf').innerText = USER.profissao;
           document.getElementById('pVtr').innerText = "VTR: " + USER.vtr;
 
+          atualizarStatusTurnos();
           carregarDadosIniciais();
+
+          // Refresh automático a cada minuto para atualizar turnos
+          setInterval(atualizarStatusTurnos, 60000);
         } catch (e) {
           console.error("Erro ao processar sessão:", e);
           window.location.href = "login.html";
@@ -926,8 +1143,46 @@
     }
 
     /**
-     * Valida o turno selecionado e verifica pendências de plantões anteriores
+     * Lógica de liberação e rótulos de turnos (Timezone Boa Vista)
      */
+    function atualizarStatusTurnos() {
+      const { hour } = getBoaVistaTime();
+
+      document.querySelectorAll('.btn-shift').forEach(btn => {
+        const turno = btn.getAttribute('data-turno');
+        const config = SHIFTS[turno];
+        let status = "bloqueado"; // bloqueado, atual, encerrando
+
+        const hStart = config.start;
+        const hEnd = config.end;
+
+        // Lógica de Janela (Início -- Fim + 1h)
+        if (turno !== "NOITE") {
+          if (hour >= hStart && hour < hEnd) status = "atual";
+          else if (hour >= hEnd && hour < (hEnd + 1)) status = "encerrando";
+        } else {
+          // Noite: 18:00 às 06:00
+          if (hour >= 18 || hour < 6) status = "atual";
+          else if (hour >= 6 && hour < 7) status = "encerrando"; // Meia-noite tratada
+        }
+
+        // Reseta labels
+        const oldLabel = btn.querySelector('.shift-label');
+        if (oldLabel) oldLabel.remove();
+
+        if (status === "atual") {
+          btn.disabled = false;
+          btn.innerHTML += `<div class="shift-label label-atual">TURNO ATUAL</div>`;
+        } else if (status === "encerrando") {
+          btn.disabled = false;
+          btn.innerHTML += `<div class="shift-label label-terminando">ENCERRANDO (+1h)</div>`;
+        } else {
+          btn.disabled = true;
+          if (USER.turno === turno) USER.turno = ""; // Desseleciona se bloqueou
+        }
+      });
+    }
+
     async function selecionarTurno(turno) {
       try {
         USER.turno = turno;
@@ -945,46 +1200,120 @@
 
         if (modoCME) abrirPainelCME();
 
-        toggleLoader(true, "VALIDANDO PRECEDÊNCIA DE PLANTÃO...");
-
-        const precedenciaMap = {
-          "MANHÃ": ["NOITE"],
-          "TARDE": ["MANHÃ"],
-          "DIA": ["NOITE"],
-          "NOITE": ["TARDE", "DIA"]
-        };
+        toggleLoader(true, "ABRINDO TURNO E CARREGANDO DADOS...");
 
         const response = await fetch(SCRIPT_URL, {
           method: 'POST',
           body: JSON.stringify({
             acao: 'verificarStatusPlantao',
-            dados: { vtr: USER.vtr, profissao: USER.profissao }
+            dados: { vtr: USER.vtr, profissao: USER.profissao, turnoSelecionado: turno }
           })
         });
 
         const res = await response.json();
 
         if (res.sucesso) {
-          const ultimoTurnoBanco = res.ultimoTurno;
-          const aceitos = precedenciaMap[turno] || [];
+          liberarChecklist();
+          await carregarDadosIniciais();
 
-          if (res.isPrimeiroRegistro || aceitos.includes(ultimoTurnoBanco)) {
-            liberarChecklist();
-            // carregarDadosIniciais já chamará o loader com sua própria mensagem
-            await carregarDadosIniciais();
-          } else {
-            toggleLoader(false);
-            const msgErro = `O turno anterior esperado era [${aceitos.join(" ou ")}], mas o último registro encontrado foi do turno [${ultimoTurnoBanco || 'NENHUM'}].`;
-            exibirBloqueio(aceitos.join("/"), msgErro, res.ultimoRegistro);
+          let hist = res.ultimosRegistrosGerais;
+          if (!hist || hist.length === 0) {
+            const respH = await fetch(SCRIPT_URL, {
+              method: 'POST',
+              body: JSON.stringify({ acao: 'obterHistoricoRecente', dados: { vtr: USER.vtr } })
+            });
+            const resH = await respH.json();
+            if (resH.sucesso) hist = resH.dados;
           }
+          renderizarHistoricoRecente(hist);
         } else {
           toggleLoader(false);
-          alert("Erro no servidor: " + res.msg);
+          alert("Ocorreu um erro ao validar o turno: " + res.msg);
         }
       } catch (e) {
         toggleLoader(false);
         alert("ERRO DE REDE: Verifique sua conexão com a internet.");
       }
+    }
+
+    /**
+     * RENDERIZA TABELA DE HISTÓRICO COM DETALHES DE SEÇÕES (FEITAS E FALTANTES)
+     */
+    function renderizarHistoricoRecente(registros) {
+      const area = document.getElementById('historicoArea');
+      if (!registros || registros.length === 0) {
+        area.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhum histórico recente encontrado no servidor.</p>';
+        return;
+      }
+
+      const areaHeader = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom: 2px solid var(--azul-samu); padding-bottom: 5px;">
+                <h3 style="color:var(--azul-samu); font-family:'Orbitron'; margin:0;">🕒 ÚLTIMOS 10 ACESSOS (DETALHADO)</h3>
+                <div style="display:flex; gap:15px; font-size:0.75rem; font-weight:bold;">
+                    <span style="color:#4caf50;">● FEITO</span>
+                    <span style="color:#f44336;">● FALTOU</span>
+                </div>
+            </div>
+        `;
+
+      const card = document.createElement('div');
+      card.className = 'history-card';
+
+      const todasSecoes = [...new Set(bancoItens.map(i => i.secao))];
+
+      if (todasSecoes.length === 0) {
+        area.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Carregando estrutura de seções...</p>';
+        setTimeout(() => renderizarHistoricoRecente(registros), 1000);
+        return;
+      }
+
+      let tabela = `
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>QUEM / CARGO</th>
+                        <th>TURNO</th>
+                        <th>DATA / HORA</th>
+                        <th>STATUS DAS SEÇÕES</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+      registros.slice(0, 10).forEach(reg => {
+        const secoesConcluidas = (reg.secoes_ok || []).map(s => normalizar(s));
+
+        let htmlStatus = todasSecoes.map(s => {
+          const isDone = secoesConcluidas.includes(normalizar(s));
+          return `
+                <div style="display:flex; align-items:center; gap:6px; font-size:0.65rem; padding: 2px 4px; background: ${isDone ? '#e8f5e9' : '#ffebee'}; border-radius: 4px; box-shadow: inset 0 0 2px rgba(0,0,0,0.05);">
+                    <span class="section-dot ${isDone ? 'dot-done' : 'dot-pending'}"></span>
+                    <span style="color:${isDone ? '#2e7d32' : '#c62828'}; font-weight: bold;">${s}</span>
+                </div>`;
+        }).join('');
+
+        tabela += `
+                <tr>
+                    <td style="min-width: 150px;">
+                        <div style="font-weight: bold; color: var(--azul-samu);">${reg.nome || '---'}</div>
+                        <div style="font-size: 0.7rem; color: #666; font-style: italic;">${reg.profissao || 'Servidor'}</div>
+                    </td>
+                    <td><span style="background:#eee; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold;">${reg.turno || '---'}</span></td>
+                    <td style="white-space: nowrap;">${reg.data || '---' || reg.hora}</td>
+                    <td>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:6px; max-height: 150px; overflow-y: auto; padding: 5px; border-left: 2px solid #eee;">
+                            ${htmlStatus}
+                        </div>
+                    </td>
+                </tr>
+            `;
+      });
+
+      tabela += '</tbody></table>';
+      card.innerHTML = tabela;
+      area.innerHTML = areaHeader;
+      area.appendChild(card);
+      area.style.display = 'block';
     }
 
     /**
@@ -1075,17 +1404,50 @@
         const indicator = document.createElement('span');
         indicator.className = 'status-indicator';
 
+        // Verifica conclusão no plantão atual
         const concluido = (bancoItens.find(i => i.secao === s && i.concluido_turno) !== undefined);
         if (concluido) indicator.classList.add('complete');
 
         btn.appendChild(indicator);
         btn.onclick = () => {
-          modoCME = false;
-          abrirSecao(s, btn);
-          if (window.innerWidth <= 768) toggleSidebar();
+          if (secaoAtual === s && document.getElementById('viewArea').style.display !== 'none') {
+            // Se já estiver aberto e clicar de novo, recolhe
+            recolherSecao();
+          } else {
+            modoCME = false;
+            abrirSecao(s, btn);
+            if (window.innerWidth <= 768) toggleSidebar();
+          }
         };
         nav.appendChild(btn);
       });
+
+      verificarConclusaoGeral();
+    }
+
+    function recolherSecao() {
+      secaoAtual = "";
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('viewArea').style.display = 'none';
+      document.getElementById('btnSalvar').style.display = 'none';
+      document.getElementById('historicoArea').style.display = 'block';
+    }
+
+    let parabensExibidoSessao = false;
+    function verificarConclusaoGeral() {
+      if (parabensExibidoSessao) return;
+
+      const secoes = [...new Set(bancoItens.map(i => i.secao))];
+      if (secoes.length === 0) return;
+
+      const todasConcluidas = secoes.every(s =>
+        bancoItens.find(i => i.secao === s && i.concluido_turno) !== undefined
+      );
+
+      if (todasConcluidas) {
+        document.getElementById('modalParabens').style.display = 'flex';
+        parabensExibidoSessao = true;
+      }
     }
 
     function abrirSecao(nomeSecao, btn) {
@@ -1096,6 +1458,7 @@
 
       document.getElementById('cmeArea').style.display = 'none';
       document.getElementById('statsArea').style.display = 'none';
+      document.getElementById('historicoArea').style.display = 'none';
       document.getElementById('viewArea').style.display = 'block';
 
       secaoAtual = nomeSecao;
@@ -1133,17 +1496,25 @@
           if (minhaProf === "ENFERMEIRO" && respItem === "MEDICO") bloqueado = true;
         }
 
-        row.className = `item-row ${bloqueado ? 'readonly-card' : ''} ${faltaCME ? 'estoque-falta' : ''}`;
+        const isItemDone = i.concluido_turno;
+        row.className = `item-row ${bloqueado ? 'readonly-card' : ''} ${faltaCME ? 'estoque-falta' : ''} ${isItemDone ? 'item-enviado-ok' : ''}`;
         row.setAttribute('data-item', i.item);
 
         const readonlyAttr = modoCME ? 'readonly' : '';
         const inputStyle = modoCME ? 'background:#f9f9f9; border-color:#eee;' : '';
-        const valorInicio = (!isNaN(i.inicio_vtr) && i.inicio_vtr !== null) ? i.inicio_vtr : i.padrao;
+
+        // CORREÇÃO:Garantir que Início nunca seja vazio/zero se houver valor no banco ou padrão
+        const valorInicio = (i.inicio_vtr !== undefined && i.inicio_vtr !== null && i.inicio_vtr !== "") ? i.inicio_vtr : i.padrao;
 
         row.innerHTML = `
           <div>
             <div class="item-text">${i.item}</div>
-            <div class="item-sub">PADRÃO: ${i.padrao}</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+               <div class="item-sub">PADRÃO: ${i.padrao}</div>
+               <button class="btn-enviar-item" onclick="enviarItemIndividual(this, '${i.item}')" style="${isItemDone ? 'background:#4caf50; color:white;' : ''}">
+                 ${isItemDone ? 'ENVIADO ✔' : 'ENVIAR ITEM'}
+               </button>
+            </div>
             ${faltaCME ? '<div style="color:red; font-size:0.6rem; font-weight:bold">⚠️ INDISPONÍVEL CME</div>' : ''}
           </div>
           <div class="inputs-grid">
@@ -1156,6 +1527,14 @@
           </div>
           <div class="col-status"><div class="status-box status-ok" style="font-size:0.6rem;">OK / COMPLETO</div></div>
         `;
+
+        // Suporte ao botão Enter em todos os inputs da linha para salvar
+        row.querySelectorAll('input').forEach(inp => {
+          inp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') enviar();
+          });
+        });
+
         area.appendChild(row);
 
         setTimeout(() => processarCalculo(row.querySelector('.in-gasto'), i.padrao), 10);
@@ -1167,7 +1546,9 @@
      * LÓGICA DE CÁLCULO DINÂMICO
      */
     function processarCalculo(el, padrao) {
-      const row = el.parentElement.parentElement;
+      const row = el.closest('.item-row');
+      if (!row) return;
+
       const inicio = parseInt(row.querySelector('.in-inicio').value) || 0;
       const gasto = parseInt(row.querySelector('.in-gasto').value) || 0;
       const repos = parseInt(row.querySelector('.in-reposicao').value) || 0;
@@ -1178,18 +1559,21 @@
       const excessoField = row.querySelector('.in-excesso');
       const statusBox = row.querySelector('.status-box');
 
-      // Se houver inconstância, ela torna-se o ponto de partida do saldo
-      const baseReal = (inconstRaw !== "") ? inconst : inicio;
+      // Se houver inconstância, ela é a base. Senão, é o valor de Início.
+      const baseReal = (inconstRaw !== "" && inconstRaw !== null) ? inconst : inicio;
+
+      // Saldo Final = Base - Gasto + Repos - Retirar
       const saldoFinal = baseReal - gasto + repos - retirar;
 
-      const excesso = saldoFinal > padrao ? saldoFinal - padrao : 0;
+      // Excesso é apenas para visualização de quanto retirar se estiver acima do padrão
+      const excesso = saldoFinal > padrao ? (saldoFinal - padrao) : 0;
       excessoField.value = excesso > 0 ? excesso : "";
 
       if (saldoFinal < padrao) {
         statusBox.innerText = "REPOR " + (padrao - saldoFinal);
         statusBox.className = "status-box status-repor";
       } else if (saldoFinal > padrao) {
-        statusBox.innerText = "RETIRAR " + excesso;
+        statusBox.innerText = "RETIRAR " + (saldoFinal - padrao);
         statusBox.className = "status-box status-retirar";
       } else {
         statusBox.innerText = "OK / COMPLETO";
@@ -1252,13 +1636,34 @@
         const res = await resp.json();
 
         if (res.sucesso) {
-          // Desliga o loader de salvamento para mostrar o de atualização
           toggleLoader(false);
           alert("Dados salvos com sucesso!");
 
-          toggleLoader(true, "ATUALIZANDO SALDOS...");
-          document.getElementById('viewArea').innerHTML = `<h3>Dados enviados. Selecione outra seção.</h3>`;
-          document.getElementById('btnSalvar').style.display = 'none';
+          // --- NOVO COMPORTAMENTO DE "RESET" PARA SEÇÃO TODA ---
+          rows.forEach(r => {
+            const inicio = parseInt(r.querySelector('.in-inicio').value) || 0;
+            const gasto = parseInt(r.querySelector('.in-gasto').value) || 0;
+            const repos = parseInt(r.querySelector('.in-reposicao').value) || 0;
+            const inconstRaw = r.querySelector('.in-inconst').value;
+            const retirar = parseInt(r.querySelector('.in-retirar').value) || 0;
+            const base = (inconstRaw !== "" && inconstRaw !== null) ? parseInt(inconstRaw) : inicio;
+            const saldoFinal = base - gasto + repos - retirar;
+
+            // Atualiza início e limpa campos
+            r.querySelector('.in-inicio').value = saldoFinal;
+            r.querySelector('.in-gasto').value = "";
+            r.querySelector('.in-reposicao').value = "";
+            r.querySelector('.in-inconst').value = "";
+            r.querySelector('.in-retirar').value = "";
+
+            // Marca a linha como ok/verde
+            r.classList.add('item-enviado-ok');
+
+            // Atualiza status box
+            const itName = r.getAttribute('data-item');
+            const padVal = bancoItens.find(bi => bi.item === itName)?.padrao || 0;
+            processarCalculo(r.querySelector('.in-gasto'), padVal);
+          });
 
           await carregarDadosIniciais();
           if (modoCME) abrirPainelCME();
@@ -1269,8 +1674,108 @@
         alert("Erro ao conectar com o servidor.");
       } finally {
         toggleLoader(false);
-        btn.innerText = "SALVAR ESTA SEÇÃO";
+        btn.innerText = "ENVIAR TODA A SEÇÃO";
         btn.disabled = false;
+      }
+    }
+
+    /**
+     * ENVIO DE ITEM INDIVIDUAL
+     */
+    async function enviarItemIndividual(btnEl, nomeItem) {
+      const row = btnEl.closest('.item-row');
+      const area = document.getElementById('viewArea');
+
+      const inicio = parseInt(row.querySelector('.in-inicio').value) || 0;
+      const gasto = parseInt(row.querySelector('.in-gasto').value) || 0;
+      const repos = parseInt(row.querySelector('.in-reposicao').value) || 0;
+      const inconstRaw = row.querySelector('.in-inconst').value;
+      const retirar = parseInt(row.querySelector('.in-retirar').value) || 0;
+      const baseReal = (inconstRaw !== "") ? parseInt(inconstRaw) : inicio;
+      const saldoFinal = baseReal - gasto + repos - retirar;
+
+      const dado = {
+        secao: secaoAtual,
+        item: nomeItem,
+        inicio: inicio,
+        gasto: gasto,
+        reposicao: repos,
+        inconstancia: inconstRaw === "" ? 0 : parseInt(inconstRaw),
+        excesso: row.querySelector('.in-excesso').value || 0,
+        retirar: retirar,
+        inconsistencia_msg: row.querySelector('.status-box').innerText,
+        saldo_final: saldoFinal
+      };
+
+      btnEl.disabled = true;
+      btnEl.innerText = "ENVIANDO...";
+
+      try {
+        const resp = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            acao: 'salvarChecklist',
+            dados: {
+              servidor: USER.nome,
+              vtr: USER.vtr,
+              turno: USER.turno,
+              profissao: USER.profissao,
+              itens: [dado],
+              bypass_trava: bypassTrava,
+              perfil_cme: modoCME
+            }
+          })
+        });
+        const res = await resp.json();
+
+        if (res.sucesso) {
+          row.classList.add('item-enviado-ok'); // Classe para ficar verde
+          btnEl.innerText = "ENVIADO ✔";
+          btnEl.style.background = "#4caf50";
+          btnEl.style.color = "white";
+          btnEl.disabled = false; // Permite clicar novamente para atualizar
+
+          // --- NOVO COMPORTAMENTO DE "COMMIT" SOLICITADO ---
+          // 1. O novo Início passa a ser o Saldo Final que acabamos de salvar
+          row.querySelector('.in-inicio').value = saldoFinal;
+
+          // 2. Zeramos os campos de entrada
+          row.querySelector('.in-gasto').value = "";
+          row.querySelector('.in-reposicao').value = "";
+          row.querySelector('.in-inconst').value = "";
+          row.querySelector('.in-retirar').value = "";
+
+          // 3. Recalculamos o status box para mostrar "OK" (já que o novo início resolve a pendência)
+          const padraoItem = bancoItens.find(bi => bi.item === nomeItem)?.padrao || 0;
+          processarCalculo(row.querySelector('.in-gasto'), padraoItem);
+
+          // Verifica se todos itens da seção agora estão ok para atualizar sidebar
+          verificarSincroniaSecao();
+        } else {
+          alert("Erro ao enviar item: " + res.msg);
+          btnEl.disabled = false;
+          btnEl.innerText = "ENVIAR ITEM";
+        }
+      } catch (e) {
+        alert("Erro de conexão.");
+        btnEl.disabled = false;
+        btnEl.innerText = "ENVIAR ITEM";
+      }
+    }
+
+    function verificarSincroniaSecao() {
+      const rowsTotal = document.querySelectorAll('.item-row:not(.readonly-card)');
+      const rowsOk = document.querySelectorAll('.item-row.item-enviado-ok');
+
+      if (rowsTotal.length > 0 && rowsTotal.length === rowsOk.length) {
+        // Se todos individuais foram, marcamos o indicador lateral como verde
+        const navBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.innerText === secaoAtual);
+        if (navBtn) {
+          const indicator = navBtn.querySelector('.status-indicator');
+          if (indicator) indicator.classList.add('complete');
+        }
+        // Verifica conclusão geral para o Parabéns
+        carregarDadosIniciais(); // Atualiza bancoItens e indicadores
       }
     }
 
@@ -1308,30 +1813,98 @@
 
     function renderizarEstatisticas(data) {
       const area = document.getElementById('statsArea');
+
+      // Cálculo do Status do Tempo Médio (Simulado/Lógica)
+      const tempoMedioMinutos = data.tempoMedioChecklist || 0;
+      let statusTempo = "badge-green";
+      if (tempoMedioMinutos > 20) statusTempo = "badge-yellow";
+      if (tempoMedioMinutos > 40) statusTempo = "badge-red";
+
       area.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h2 style="color:var(--azul-samu); font-family:'Orbitron';">📊 DASHBOARD</h2>
-          <button onclick="window.location.reload()" style="cursor:pointer; font-weight:bold;">🏠 Voltar</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+          <h2 style="color:var(--azul-samu); font-family:'Orbitron'; margin:0;">📊 DASHBOARD ESTATÍSTICO</h2>
+          <button onclick="window.location.reload()" style="cursor:pointer; font-weight:bold; background:var(--azul-samu); color:white; border:none; padding:8px 15px; border-radius:8px;">🏠 Voltar ao Início</button>
         </div>
+
         <div class="stats-grid">
+          <!-- CARD 1: TEMPO MÉDIO -->
           <div class="stat-card">
-            <h3>👷 PARTICIPAÇÃO</h3>
-            <div style="font-size:1.5rem; font-weight:bold;">
-              Enfermeiro: ${data.profissoes.ENFERMEIRO || 0}%<br>
-              Médico: ${data.profissoes.MEDICO || 0}%
+            <h3>⏱️ TEMPO MÉDIO DE CHECKLIST</h3>
+            <div class="stat-value">${tempoMedioMinutos} min</div>
+            <div class="stat-sub">Média entre início do turno e 100% verde</div>
+            <div><span class="status-badge ${statusTempo}">${tempoMedioMinutos <= 20 ? 'Excelente' : (tempoMedioMinutos <= 40 ? 'Atenção' : 'Crítico')}</span></div>
+          </div>
+
+          <!-- CARD 2: TURNOS INCOMPLETOS -->
+          <div class="stat-card">
+             <h3>❌ TURNOS COM CHECKLIST INCOMPLETO</h3>
+             <div class="stat-value" style="color:var(--vermelho-samu);">${data.turnosIncompletosTotal || 0}</div>
+             <div class="ranking-list" style="max-height: 120px; overflow-y:auto;">
+                ${(data.profissionaisIncompletos || []).map(p => `<div class="ranking-item"><span>${p.nome}</span> <strong style="color:var(--vermelho-samu);">${p.turno}</strong></div>`).join('')}
+                ${(!data.profissionaisIncompletos || data.profissionaisIncompletos.length === 0) ? '<div class="stat-sub">Nenhuma pendência recente.</div>' : ''}
+             </div>
+          </div>
+
+          <!-- CARD 3: ITENS MAIS AJUSTADOS -->
+          <div class="stat-card">
+            <h3>⚠️ ITENS MAIS AJUSTADOS</h3>
+            <div class="ranking-list">
+               ${(data.itensAjustados || []).slice(0, 10).map((item, i) => `
+                 <div class="ranking-item">
+                    <span>${i + 1}º ${item.nome}</span>
+                    <strong style="color:var(--laranja-samu);">${item.total}x</strong>
+                 </div>
+               `).join('')}
+               ${(!data.itensAjustados || data.itensAjustados.length === 0) ? '<div class="stat-sub">Sem divergências registradas.</div>' : ''}
             </div>
           </div>
+
+          <!-- CARD 4: RANKING MEDICAMENTOS -->
           <div class="stat-card">
-            <h3>⏰ PICOS DE ACESSO</h3>
-            <div class="ranking-list">${(data.horariosPico || []).map(h => `<div class="ranking-item"><span>${h.intervalo}h</span> <strong>${h.total}</strong></div>`).join('')}</div>
+            <h3>💊 RANKING MEDICAMENTOS UTILIZADOS</h3>
+            <div class="ranking-list">
+               ${(data.rankingMedicamentos && data.rankingMedicamentos.length > 0) ? data.rankingMedicamentos.slice(0, 5).map((m, i) => `
+                 <div class="ranking-item">
+                    <span>${i + 1}º ${m.nome}</span>
+                    <strong>${m.total}</strong>
+                 </div>
+               `).join('') : '<div class="stat-sub" style="text-align:center;">Nenhum consumo registrado.</div>'}
+            </div>
           </div>
+
+          <!-- CARD 5: RANKING PSICOTRÓPICOS -->
           <div class="stat-card">
-            <h3>🥇 RANKING INCONSTÂNCIA</h3>
-            <div class="ranking-list">${(data.rankingInconst || []).map((p, i) => `<div class="ranking-item"><span>${i + 1}º ${p.nome}</span> <strong>${p.total}</strong></div>`).join('')}</div>
+            <h3>🧠 RANKING DE PSICOTRÓPICOS</h3>
+            <div class="ranking-list">
+               ${(data.rankingPsicotropicos && data.rankingPsicotropicos.length > 0) ? data.rankingPsicotropicos.slice(0, 5).map((p, i) => `
+                 <div class="ranking-item">
+                    <span>${i + 1}º ${p.nome}</span>
+                    <strong>${p.total}</strong>
+                 </div>
+               `).join('') : '<div class="stat-sub" style="text-align:center;">Nenhum consumo registrado.</div>'}
+            </div>
           </div>
+
+          <!-- CARD 6: PICOS DE ACESSO (IDs ÚNICOS) -->
           <div class="stat-card">
+             <h3>⏰ PICOS DE ACESSO (IDs ÚNICOS)</h3>
+             <div class="ranking-list">
+                ${(data.horariosPico || []).map(h => `<div class="ranking-item"><span>${h.intervalo}h</span> <strong>${h.total} Servidores</strong></div>`).join('')}
+             </div>
+             <div class="stat-sub">Considera apenas um acesso por ID/Profissional por hora.</div>
+          </div>
+
+          <!-- CARD 7: RASTREIO ANTECESSOR -->
+          <div class="stat-card" style="grid-column: span 1;">
             <h3>🕵️ RASTREIO ANTECESSOR</h3>
-            <div class="ranking-list">${(data.rastroAntecessor || []).map(r => `<div class="ranking-item"><span>${r.reclamante}</span> ➔ <strong>${r.antecessor}</strong></div>`).join('')}</div>
+            <div class="ranking-list" style="max-height: 200px; overflow-y:auto;">${(data.rastroAntecessor || []).map(r => `
+                <div class="ranking-item" style="flex-direction:column; align-items:flex-start; gap:2px; padding: 10px; border-bottom: 1px dashed #ddd;">
+                    <div style="font-size:0.75rem; color:var(--vermelho-samu); font-weight:bold;">${r.reclamante || r.atual || '---'}</div>
+                    <div style="font-size:0.65rem; color:#666;">➔ Antecessor esperado: <strong>${r.antecessor || r.antigo || '---'}</strong></div>
+                </div>
+            `).join('')}
+            ${(!data.rastroAntecessor || data.rastroAntecessor.length === 0) ? '<p style="font-size:0.7rem; color:#999; text-align:center;">Nenhuma divergência detectada.</p>' : ''}
+            </div>
           </div>
         </div>
       `;

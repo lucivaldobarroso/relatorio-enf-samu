@@ -398,6 +398,12 @@
                 res.vtrs.forEach(v => selVtr.add(new Option(v, v)));
 
                 gerarDesafioAleatorio();
+
+                // Suporte ao Enter no Login
+                document.getElementById('loginSenha').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') entrar();
+                });
+
                 toggleLoader(false);
             }
         };
@@ -408,10 +414,16 @@
         function gerarDesafioAleatorio() {
             const tipos = ['dia', 'mes', 'ano'];
             desafioAtual = tipos[Math.floor(Math.random() * tipos.length)];
-            document.getElementById('areaDesafio').innerHTML = `
+            const area = document.getElementById('areaDesafio');
+            area.innerHTML = `
                 <label>${desafioAtual.toUpperCase()} DE NASCIMENTO</label>
                 <input type="text" id="valDesafio" placeholder="Digite o ${desafioAtual}...">
             `;
+
+            // Suporte ao Enter no Desafio
+            area.querySelector('input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') entrar();
+            });
         }
 
         /**

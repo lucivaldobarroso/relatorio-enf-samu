@@ -1,0 +1,17 @@
+{
+  "name": "samu-check-enfermeiro-2026",
+  "version": "1.0.0",
+  "description": "Sistema de gerenciamento de checklist para viaturas de Suporte Avançado (USA) do SAMU 192. Este projeto visa digitalizar e otimizar a conferência de materiais e insumos, garantindo maior agilidade e controle no início de cada plantão.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
