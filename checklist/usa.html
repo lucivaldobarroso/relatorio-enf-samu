@@ -1078,12 +1078,37 @@
      */
     function getBoaVistaTime() {
       const now = new Date();
-      // Converte para o timezone America/Boa_Vista
-      const options = { timeZone: 'America/Boa_Vista', hour12: false, hour: 'numeric', minute: 'numeric', second: 'numeric' };
-      const [h, m, s] = now.toLocaleTimeString('pt-BR', options).split(':').map(Number);
-      const bvDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Boa_Vista' }));
-      return { hour: h, minute: m, date: bvDate };
+      try {
+        // Converte para o timezone America/Boa_Vista usando Intl.DateTimeFormat (mais seguro para iOS)
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'America/Boa_Vista',
+          hour12: false,
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric'
+        });
+
+        const parts = formatter.formatToParts(now);
+        const getPart = (type) => parts.find(p => p.type === type).value;
+
+        const h = parseInt(getPart('hour'));
+        const m = parseInt(getPart('minute'));
+        const s = parseInt(getPart('second'));
+
+        // Criar um objeto Date representativo para Boa Vista (apenas para consistência se necessário)
+        const bvDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Boa_Vista' }));
+
+        return { hour: h, minute: m, date: bvDate };
+      } catch (e) {
+        // Fallback básico caso o Intl falhe
+        console.error("Erro ao obter hora de Boa Vista:", e);
+        return { hour: now.getHours(), minute: now.getMinutes(), date: now };
+      }
     }
+
 
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
@@ -1578,7 +1603,7 @@
             <div class="item-text">${i.item}</div>
             <div style="display:flex; align-items:center; gap:8px;">
                <div class="item-sub">PADRÃO: ${i.padrao}</div>
-               <button class="btn-enviar-item" onclick="enviarItemIndividual(this, '${i.item}')" style="${isItemDone ? 'background:#4caf50; color:white;' : ''}">
+               <button class="btn-enviar-item" onclick="enviarItemIndividual(this, '${i.item}')" ${bloqueado ? 'disabled style="display:none;"' : ''} style="${isItemDone ? 'background:#4caf50; color:white;' : ''}">
                  ${isItemDone ? 'ENVIADO ✔' : 'ENVIAR ITEM'}
                </button>
             </div>
@@ -1599,7 +1624,29 @@
         processarCalculo(row.querySelector('.in-gasto'), i.padrao);
       });
       area.appendChild(fragment);
-      document.getElementById('btnSalvar').style.display = 'block';
+
+      // Bloqueio do botão principal se todos os itens da seção forem bloqueados (outra profissão)
+      const btnSalvar = document.getElementById('btnSalvar');
+      const totalItens = itens.length;
+      const totalBloqueados = itens.filter(i => {
+        const respItem = normalizar(i.responsavel);
+        const minhaProf = normalizar(USER.profissao);
+        if (minhaProf === "MEDICO" && respItem === "ENFERMEIRO") return true;
+        if (minhaProf === "ENFERMEIRO" && respItem === "MEDICO") return true;
+        return false;
+      }).length;
+
+      if (!modoCME && totalBloqueados === totalItens) {
+        btnSalvar.disabled = true;
+        btnSalvar.innerText = "SEÇÃO BLOQUEADA (OUTRA PROFISSÃO)";
+        btnSalvar.style.background = "#ccc";
+      } else {
+        btnSalvar.disabled = false;
+        btnSalvar.innerText = "ENVIAR TODA A SEÇÃO";
+        btnSalvar.style.background = "linear-gradient(135deg, var(--azul-samu), #0066cc)";
+      }
+
+      btnSalvar.style.display = 'block';
     }
 
     /**
@@ -1967,8 +2014,3 @@
 </body>
 
 </html>
-
-
-
-
-
