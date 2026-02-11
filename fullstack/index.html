@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Cantina Fácil</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#eeee2b",
+            "primary-dark": "#d4d422",
+            "accent": "#1a1a1a",
+            "background-light": "#F9F9F7",
+            "background-dark": "#0F0F0F",
+          },
+          fontFamily: {
+            "display": ["Lexend", "sans-serif"]
+          },
+          borderRadius: {
+            "3xl": "1.5rem",
+            "4xl": "2rem"
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Lexend', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      background-color: #0F0F0F;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .tap-active:active {
+      transform: scale(0.95);
+      transition: transform 0.1s ease;
+    }
+
+    /* Hover Float com Inclinação (Tilt) solicitado */
+    .hover-float {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .hover-float:hover {
+      transform: translateY(-10px) rotate(1.5deg);
+      box-shadow: 0 30px 40px -15px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -468px 0;
+      }
+
+      100% {
+        background-position: 468px 0;
+      }
+    }
+
+    .animate-shimmer {
+      background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
+      background-size: 800px 104px;
+      animation: shimmer 1.5s infinite linear;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .libras-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="text-slate-800">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+
+  <!-- VLibras Support -->
+  <div vw class="enabled">
+    <div vw-access-button class="active" style="display:none !important;"></div>
+    <div vw-plugin-wrapper>
+      <div class="vw-plugin-top-wrapper"></div>
+    </div>
+  </div>
+  <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+  <script>
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
+  </script>
+</body>
+
+</html>

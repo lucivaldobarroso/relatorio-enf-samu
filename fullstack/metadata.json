@@ -1,0 +1,7 @@
+{
+  "name": "Cantina Fácil",
+  "description": "Um sistema completo de gestão para cantinas escolares e empresariais, incluindo PDV, controle de estoque, financeiro e gestão de créditos.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
