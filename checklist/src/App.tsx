@@ -15,6 +15,8 @@ const App = () => (
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/index.html" element={<Navigate to="/" replace />} />
+          <Route path="/samu.html" element={<Navigate to="/" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
