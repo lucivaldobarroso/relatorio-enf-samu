@@ -257,22 +257,12 @@ export async function salvarChecklist(dados: {
     return 'USR';
   })();
 
-  const { data: ultimoRegistro } = await supabase
-    .from('submits_checklist')
-    .select('id')
-    .order('data_hora', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const numeroAtual = (() => {
-    const idAnterior = String(ultimoRegistro?.id || '');
-    const match = idAnterior.match(/(\d+)$/);
-    return match ? parseInt(match[1], 10) : 0;
-  })();
-
   const now = new Date().toISOString();
   const records = dados.itens.map((item, index) => ({
-    id: `${prefixoId}-${dados.vtr}-${numeroAtual + index + 1}`,
+    id:
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? `${prefixoId}-${dados.vtr}-${crypto.randomUUID()}`
+        : `${prefixoId}-${dados.vtr}-${Date.now()}-${index + 1}-${Math.random().toString(36).slice(2, 8)}`,
     data_hora: now,
     servidor: dados.servidor,
     vtr: dados.vtr,
