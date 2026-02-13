@@ -17,7 +17,7 @@ type ViewMode = 'checklist' | 'cme' | 'stats' | 'none';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, logout, setTurno } = useSession();
+  const { user, initialized, logout, setTurno } = useSession();
   const [loading, setLoading] = useState(true);
   const [loadingText, setLoadingText] = useState('SINCRONIZANDO ITENS...');
   const [bancoItens, setBancoItens] = useState<ChecklistItem[]>([]);
@@ -49,12 +49,15 @@ const Dashboard = () => {
   }, [user]);
 
   useEffect(() => {
+    if (!initialized) {
+      return;
+    }
     if (!user) {
       navigate('/');
       return;
     }
     loadData();
-  }, [user, navigate, loadData]);
+  }, [initialized, user, navigate, loadData]);
 
   const secoes = [...new Set(bancoItens.map(i => i.secao))];
 

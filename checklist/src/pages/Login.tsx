@@ -8,7 +8,7 @@ type DesafioType = 'dia' | 'mes' | 'ano';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { user, login } = useSession();
+  const { user, initialized, login } = useSession();
   const [screen, setScreen] = useState<Screen>('login');
   const [loading, setLoading] = useState(true);
   const [loadingText, setLoadingText] = useState('SINCRONIZANDO COM O PORTAL SAMU 192');
@@ -49,12 +49,15 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
+    if (!initialized) {
+      return;
+    }
     if (user) {
       navigate('/dashboard');
       return;
     }
     loadInitialData();
-  }, [user, navigate, loadInitialData]);
+  }, [initialized, user, navigate, loadInitialData]);
 
   const gerarDesafio = () => {
     const tipos: DesafioType[] = ['dia', 'mes', 'ano'];

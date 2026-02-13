@@ -14,6 +14,7 @@ const SESSION_KEY = 'usuario_samu';
 
 export function useSession() {
   const [user, setUser] = useState<UserSession | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(SESSION_KEY);
@@ -24,6 +25,7 @@ export function useSession() {
         localStorage.removeItem(SESSION_KEY);
       }
     }
+    setInitialized(true);
   }, []);
 
   const login = useCallback((session: UserSession) => {
@@ -45,7 +47,7 @@ export function useSession() {
     });
   }, []);
 
-  return { user, login, logout, setTurno };
+  return { user, initialized, login, logout, setTurno };
 }
 
 export {
