@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* SAMU 192 Design System */
+    --background: 210 25% 96%;
+    --foreground: 0 0% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+
+    --primary: 212 100% 30%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 25% 96%;
+    --secondary-foreground: 212 100% 30%;
+
+    --muted: 210 25% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 36 100% 48%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 357 95% 46%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 212 100% 30%;
+
+    --radius: 0.75rem;
+
+    /* SAMU Custom tokens */
+    --samu-azul: 212 100% 30%;
+    --samu-vermelho: 357 95% 46%;
+    --samu-laranja: 36 100% 48%;
+    --samu-glass: 0 0% 100% / 0.9;
+
+    --status-ok-bg: 120 40% 92%;
+    --status-ok-fg: 122 39% 33%;
+    --status-repor-bg: 0 100% 96%;
+    --status-repor-fg: 0 65% 47%;
+    --status-retirar-bg: 210 100% 94%;
+    --status-retirar-fg: 212 82% 37%;
+    --status-warning-bg: 55 100% 94%;
+    --status-warning-fg: 46 100% 30%;
+
+    --sidebar-background: 0 0% 100% / 0.9;
+    --sidebar-foreground: 0 0% 27%;
+    --sidebar-primary: 212 100% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 212 100% 95%;
+    --sidebar-accent-foreground: 212 100% 30%;
+    --sidebar-border: 0 0% 87%;
+    --sidebar-ring: 212 100% 30%;
+  }
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100dvh;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (max-width: 768px) {
+    input,
+    select,
+    textarea,
+    button {
+      font-size: 16px;
+    }
+  }
+}
+
+@layer utilities {
+  .font-orbitron {
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .glass {
+    background: hsla(var(--samu-glass));
+    backdrop-filter: blur(10px);
+  }
+
+  .samu-gradient {
+    background: linear-gradient(135deg, hsl(var(--samu-azul)), hsl(212, 100%, 40%));
+  }
+
+  .samu-gradient-red {
+    background: linear-gradient(135deg, hsl(var(--samu-vermelho)), hsl(0, 100%, 60%));
+  }
+}
