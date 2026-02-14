@@ -107,6 +107,7 @@ export async function realizarLogin(dados: {
     logado: true,
     nome: servidor.nome,
     profissao: servidor.profissao,
+    codigo_servidor: servidor.codigo_servidor || null,
   };
 }
 
@@ -172,11 +173,20 @@ export async function carregarItens(vtr: string, turno: string): Promise<Checkli
 
   if (error || !configItems) return [];
 
-  // Get today's date range for Boa Vista timezone
+  // Define start window by shift in Boa Vista timezone.
+  // For NOITE, keep the same shift across midnight (18:00 -> 06:00).
   const bvNow = getBoaVistaTime();
   const today = bvNow.date;
-  const startOfDay = new Date(today);
-  startOfDay.setHours(0, 0, 0, 0);
+  const turnoNorm = normalizar(turno);
+  const startWindow = new Date(today);
+  if (turnoNorm === 'NOITE') {
+    if (bvNow.hour < 6) {
+      startWindow.setDate(startWindow.getDate() - 1);
+    }
+    startWindow.setHours(18, 0, 0, 0);
+  } else {
+    startWindow.setHours(0, 0, 0, 0);
+  }
 
   // Get recent submits for this VTR and turno
   const { data: recentSubmits } = await supabase
@@ -184,7 +194,7 @@ export async function carregarItens(vtr: string, turno: string): Promise<Checkli
     .select('*')
     .eq('vtr', vtr)
     .eq('turno', turno)
-    .gte('data_hora', startOfDay.toISOString())
+    .gte('data_hora', startWindow.toISOString())
     .order('data_hora', { ascending: false });
 
   // Get the most recent submit per item
@@ -257,35 +267,75 @@ export async function salvarChecklist(dados: {
     return 'USR';
   })();
 
-  const now = new Date().toISOString();
-  const records = dados.itens.map((item, index) => ({
-    id:
-      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? `${prefixoId}-${dados.vtr}-${crypto.randomUUID()}`
-        : `${prefixoId}-${dados.vtr}-${Date.now()}-${index + 1}-${Math.random().toString(36).slice(2, 8)}`,
-    data_hora: now,
-    servidor: dados.servidor,
-    vtr: dados.vtr,
-    turno: dados.turno,
-    secao: item.secao,
-    item: item.item,
-    inicio: item.inicio,
-    gasto: item.gasto,
-    reposicao: item.reposicao,
-    excesso: item.excesso,
-    inconsistencia: item.inconstancia,
-    retirar: item.retirar,
-    situacao: item.inconsistencia_msg,
-    bypass_trava: dados.bypass_trava,
-    perfil_envio: dados.perfil_cme ? 'CME' : dados.profissao,
-    saldo_final: item.saldo_final,
-  }));
+  const obterUltimoNumero = async () => {
+    const prefixoBase = `${prefixoId}-${dados.vtr}-`;
+    const { data: ids, error } = await supabase
+      .from('submits_checklist')
+      .select('id')
+      .like('id', `${prefixoBase}%`)
+      .order('data_hora', { ascending: false })
+      .limit(500);
 
-  const { error } = await supabase.from('submits_checklist').insert(records);
+    if (error || !ids?.length) return 0;
+
+    let maxNumero = 0;
+    ids.forEach(({ id }) => {
+      const rawId = String(id || '');
+      if (!rawId.startsWith(prefixoBase)) return;
+      const sufixo = rawId.slice(prefixoBase.length);
+      const match = sufixo.match(/^(\d+)$/);
+      if (match) {
+        const numero = parseInt(match[1], 10);
+        if (!Number.isNaN(numero) && numero > maxNumero) {
+          maxNumero = numero;
+        }
+      }
+    });
+
+    return maxNumero;
+  };
+
+  const montarRegistros = (numeroInicial: number) => {
+    const now = new Date().toISOString();
+    return dados.itens.map((item, index) => ({
+      id: `${prefixoId}-${dados.vtr}-${numeroInicial + index + 1}`,
+      data_hora: now,
+      servidor: dados.servidor,
+      vtr: dados.vtr,
+      turno: dados.turno,
+      secao: item.secao,
+      item: item.item,
+      inicio: item.inicio,
+      gasto: item.gasto,
+      reposicao: item.reposicao,
+      excesso: item.excesso,
+      inconsistencia: item.inconstancia,
+      retirar: item.retirar,
+      situacao: item.inconsistencia_msg,
+      bypass_trava: dados.bypass_trava,
+      perfil_envio: dados.perfil_cme ? 'CME' : dados.profissao,
+      saldo_final: item.saldo_final,
+    }));
+  };
+
+  const inserirRegistros = async () => {
+    const numeroAtual = await obterUltimoNumero();
+    const records = montarRegistros(numeroAtual);
+    return supabase.from('submits_checklist').insert(records);
+  };
+
+  let { error } = await inserirRegistros();
+
+  // Retry curto para colisão eventual entre gravações simultâneas.
+  if (error?.message?.includes('duplicate key value violates unique constraint')) {
+    ({ error } = await inserirRegistros());
+  }
+
   if (error) {
     console.error('Erro ao salvar:', error);
     return { sucesso: false, msg: error.message };
   }
+
   return { sucesso: true };
 }
 
@@ -298,11 +348,39 @@ export async function obterHistoricoRecente(vtr: string) {
     .select('*')
     .eq('vtr_selecionada', vtr)
     .order('data_hora', { ascending: false })
-    .limit(10);
+    .limit(80);
 
   if (!logs || logs.length === 0) return [];
 
-  // For each log, find which sections were completed
+  const nomes = [...new Set(logs.map((l) => String(l.nome_servidor || '')).filter(Boolean))];
+  const { data: servidores } = await supabase
+    .from('servidores')
+    .select('nome,profissao,codigo_servidor')
+    .in('nome', nomes);
+
+  const profissaoPorNome = new Map<string, string>();
+  const codigoPorNome = new Map<string, string>();
+  (servidores || []).forEach((s) => {
+    profissaoPorNome.set(String(s.nome || ''), String(s.profissao || 'Servidor'));
+    codigoPorNome.set(String(s.nome || ''), String(s.codigo_servidor || ''));
+  });
+
+  const { data: configItems } = await supabase
+    .from('config_checklist')
+    .select('secao,item,estoque');
+
+  const totalItensPorSecao = new Map<string, number>();
+  (configItems || []).forEach((cfg) => {
+    const secao = String(cfg.secao || '');
+    const estoqueNorm = normalizar(String((cfg as { estoque?: string }).estoque || ''));
+    if (!secao) return;
+    if (estoqueNorm === 'NAO TEM') return;
+    totalItensPorSecao.set(secao, (totalItensPorSecao.get(secao) || 0) + 1);
+  });
+
+  const turnoOrder: Record<string, number> = { MANHA: 1, TARDE: 2, DIA: 3, NOITE: 4 };
+
+  // For each log, classify each section as complete / incomplete / missing
   const results = await Promise.all(
     logs.map(async (log) => {
       const logDate = new Date(log.data_hora);
@@ -313,31 +391,109 @@ export async function obterHistoricoRecente(vtr: string) {
 
       const { data: submits } = await supabase
         .from('submits_checklist')
-        .select('secao')
+        .select('secao,item,turno,data_hora,servidor')
         .eq('vtr', vtr)
-        .eq('servidor', log.nome_servidor)
         .gte('data_hora', startOfDay.toISOString())
         .lte('data_hora', endOfDay.toISOString());
 
-      const secoesOk = [...new Set((submits || []).map(s => s.secao))];
+      const submitsOrdenados = [...(submits || [])].sort(
+        (a, b) => new Date(String(b.data_hora || '')).getTime() - new Date(String(a.data_hora || '')).getTime(),
+      );
+      const submitsServidor = submitsOrdenados.filter(
+        (s) => String((s as { servidor?: string }).servidor || '') === String(log.nome_servidor || ''),
+      );
+      const turnoDetectado = String(submitsServidor[0]?.turno || submitsOrdenados[0]?.turno || '---');
+      const submitsDoTurno =
+        turnoDetectado === '---'
+          ? submitsOrdenados
+          : submitsOrdenados.filter((s) => String(s.turno || '') === turnoDetectado);
+
+      const ultimoSubmitTurno = submitsDoTurno[0];
+      const primeiroSubmitTurno = submitsDoTurno[submitsDoTurno.length - 1];
+      const tempoSessaoMin = (() => {
+        if (!ultimoSubmitTurno || !primeiroSubmitTurno) return 0;
+        const fim = new Date(String(ultimoSubmitTurno.data_hora || '')).getTime();
+        const inicio = new Date(String(primeiroSubmitTurno.data_hora || '')).getTime();
+        if (Number.isNaN(fim) || Number.isNaN(inicio) || fim < inicio) return 0;
+        return Math.round((fim - inicio) / 60000);
+      })();
+
+      const itensPorSecao = new Map<string, Set<string>>();
+      submitsDoTurno.forEach((row) => {
+        const secao = String(row.secao || '');
+        const item = String(row.item || '');
+        if (!secao || !item) return;
+        if (!itensPorSecao.has(secao)) itensPorSecao.set(secao, new Set<string>());
+        itensPorSecao.get(secao)!.add(item);
+      });
+
+      const secoesOk: string[] = [];
+      const secoesIncompletas: string[] = [];
+
+      totalItensPorSecao.forEach((totalItens, secao) => {
+        const enviados = itensPorSecao.get(secao)?.size || 0;
+        if (totalItens === 0) {
+          secoesOk.push(secao);
+          return;
+        }
+        if (enviados >= totalItens && totalItens > 0) {
+          secoesOk.push(secao);
+        } else if (enviados > 0 && enviados < totalItens) {
+          secoesIncompletas.push(secao);
+        }
+      });
+
+      const totalSecoes = totalItensPorSecao.size || 1;
+      const secoesConcluidas = secoesOk.length;
+      const percentualConclusao = Math.round((secoesConcluidas / totalSecoes) * 100);
 
       return {
         nome: log.nome_servidor,
-        profissao: 'Servidor',
-        turno: '---',
+        profissao: profissaoPorNome.get(String(log.nome_servidor || '')) || 'Servidor',
+        codigo_servidor: codigoPorNome.get(String(log.nome_servidor || '')) || '',
+        turno: turnoDetectado,
         data: new Date(log.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Boa_Vista' }),
+        ts: new Date(log.data_hora).getTime(),
+        dateKey: new Date(log.data_hora).toLocaleDateString('sv-SE', { timeZone: 'America/Boa_Vista' }),
         secoes_ok: secoesOk,
+        secoes_incompletas: secoesIncompletas,
+        resumo_conclusao: `${secoesConcluidas}/${totalSecoes} secoes (${percentualConclusao}%)`,
+        tempo_sessao_min: tempoSessaoMin,
+        ultima_secao: String(ultimoSubmitTurno?.secao || '---'),
+        ultima_secao_hora: ultimoSubmitTurno?.data_hora
+          ? new Date(String(ultimoSubmitTurno.data_hora)).toLocaleTimeString('pt-BR', {
+              timeZone: 'America/Boa_Vista',
+              hour: '2-digit',
+              minute: '2-digit',
+            })
+          : '--:--',
       };
     })
   );
 
-  return results;
+  const dedup = new Map<string, (typeof results)[number]>();
+  results.forEach((row) => {
+    const turnoNorm = normalizar(String(row.turno || '---'));
+    const turnoKey = turnoNorm in turnoOrder ? turnoNorm : '---';
+    const key = `${row.nome}__${row.dateKey}__${turnoKey}`;
+    const existing = dedup.get(key);
+    if (!existing || row.ts > existing.ts) {
+      dedup.set(key, row);
+    }
+  });
+
+  return Array.from(dedup.values())
+    .sort((a, b) => b.ts - a.ts)
+    .slice(0, 10)
+    .map(({ ts, dateKey, ...row }) => row);
 }
 
 export interface RankingProfissaoEntry {
   nome: string;
   acessos: number;
-  concluidos: number;
+  concluidos: string;
+  incompletos: number;
+  naoRealizados: number;
   taxaConclusao: number;
 }
 
@@ -378,7 +534,8 @@ export interface DashboardEstatisticoData {
   rankingMedicamentos: ItemAjustadoEntry[];
   rankingPsicotropicos: ItemAjustadoEntry[];
   picosAcesso: PicoAcessoEntry[];
-  rastreioAntecessor: RastreioAntecessorEntry[];
+  rastreioAntecessorEnfermeiros: RastreioAntecessorEntry[];
+  rastreioAntecessorMedicos: RastreioAntecessorEntry[];
   rankingEnfermeiros: RankingProfissaoEntry[];
   rankingMedicos: RankingProfissaoEntry[];
   turnosIncompletos: TurnoIncompletoEntry[];
@@ -408,13 +565,42 @@ function isProfissao(normProf: string, key: 'ENFERMEIRO' | 'MEDICO') {
   return normProf.includes('MEDICO') || normProf.includes('MÉDICO');
 }
 
+function isEnfermeiroProf(normProf: string) {
+  return normProf.includes('ENFERMEIRO');
+}
+
+function isMedicoProf(normProf: string) {
+  return normProf.includes('MEDICO') || normProf.includes('MÃ‰DICO');
+}
+
+function isSecaoEquipe(responsavelNorm: string) {
+  return (
+    responsavelNorm.includes('EQUIPE') ||
+    responsavelNorm.includes('TODOS') ||
+    responsavelNorm.includes('AMBOS') ||
+    responsavelNorm.includes('GERAL') ||
+    responsavelNorm.includes('USA')
+  );
+}
+
+function responsavelCombinaComProfissao(responsavelNorm: string, profissaoNorm: string) {
+  if (!responsavelNorm) return true;
+  if (profissaoNorm.includes('COORD')) return true;
+  if (isSecaoEquipe(responsavelNorm)) return true;
+  if (profissaoNorm.includes('ENFERMEIRO') && responsavelNorm.includes('ENFERMEIRO')) return true;
+  if ((profissaoNorm.includes('MEDICO') || profissaoNorm.includes('MÉDICO')) && (responsavelNorm.includes('MEDICO') || responsavelNorm.includes('MÉDICO'))) return true;
+  if (profissaoNorm.includes('CONDUTOR') && responsavelNorm.includes('CONDUTOR')) return true;
+  if (profissaoNorm.includes('TECNICO') && (responsavelNorm.includes('TECNICO') || responsavelNorm.includes('ENFERMAG'))) return true;
+  return false;
+}
+
 export async function obterDashboardEstatistico(vtr: string, days = 30): Promise<DashboardEstatisticoData> {
   const now = new Date();
   const start = new Date(now);
   start.setDate(now.getDate() - Math.max(days, 1));
 
   const [configRes, submitsRes, logsRes, servidoresRes] = await Promise.all([
-    supabase.from('config_checklist').select('secao,item'),
+    supabase.from('config_checklist').select('secao,item,responsavel,estoque'),
     supabase
       .from('submits_checklist')
       .select('data_hora,servidor,turno,secao,item,gasto,reposicao,excesso,inconsistencia,retirar,vtr')
@@ -436,13 +622,23 @@ export async function obterDashboardEstatistico(vtr: string, days = 30): Promise
   const servidores = servidoresRes.data || [];
 
   const totalSecoes = new Set(configRows.map(c => c.secao)).size || 1;
+  const secoesSet = new Set<string>(configRows.map(c => String(c.secao || '')).filter(Boolean));
+  const responsaveisPorSecao = new Map<string, Set<string>>();
+  const totalItensPorSecao = new Map<string, number>();
+  configRows.forEach((row) => {
+    const secao = String(row.secao || '');
+    const estoqueNorm = normalizar(String((row as { estoque?: string }).estoque || ''));
+    if (!secao) return;
+    const respNorm = normalizar(String((row as { responsavel?: string }).responsavel || ''));
+    if (!responsaveisPorSecao.has(secao)) responsaveisPorSecao.set(secao, new Set<string>());
+    if (respNorm) responsaveisPorSecao.get(secao)!.add(respNorm);
+    if (estoqueNorm !== 'NAO TEM') {
+      totalItensPorSecao.set(secao, (totalItensPorSecao.get(secao) || 0) + 1);
+    }
+  });
 
-  const accessByName = new Map<string, number>();
   const accessesByHour = new Map<number, number>();
   logs.forEach(log => {
-    const nome = String(log.nome_servidor || '');
-    accessByName.set(nome, (accessByName.get(nome) || 0) + 1);
-
     const hour = parseInt(
       new Date(log.data_hora).toLocaleTimeString('en-GB', {
         timeZone: 'America/Boa_Vista',
@@ -455,6 +651,8 @@ export async function obterDashboardEstatistico(vtr: string, days = 30): Promise
   });
 
   const sessions = new Map<string, SessionAgg>();
+  const secoesPorTurnoData = new Map<string, Set<string>>();
+  const itensPorSecaoTurnoData = new Map<string, Map<string, Set<string>>>();
   const ajustesByItem = new Map<string, ItemAjustadoEntry>();
   const medsMap = new Map<string, ItemAjustadoEntry>();
   const psychoMap = new Map<string, ItemAjustadoEntry>();
@@ -462,6 +660,7 @@ export async function obterDashboardEstatistico(vtr: string, days = 30): Promise
   submits.forEach(row => {
     const dateKey = toBvDateKey(row.data_hora);
     const key = `${row.servidor}__${row.turno}__${dateKey}`;
+    const keyTurnoData = `${row.turno}__${dateKey}`;
     const ts = new Date(row.data_hora).getTime();
     const secao = String(row.secao || '');
     const item = String(row.item || '');
@@ -482,6 +681,18 @@ export async function obterDashboardEstatistico(vtr: string, days = 30): Promise
       existing.maxTs = Math.max(existing.maxTs, ts);
       existing.secoes.add(secao);
     }
+
+    if (!secoesPorTurnoData.has(keyTurnoData)) {
+      secoesPorTurnoData.set(keyTurnoData, new Set<string>());
+    }
+    secoesPorTurnoData.get(keyTurnoData)!.add(secao);
+
+    if (!itensPorSecaoTurnoData.has(keyTurnoData)) {
+      itensPorSecaoTurnoData.set(keyTurnoData, new Map<string, Set<string>>());
+    }
+    const mapaTurno = itensPorSecaoTurnoData.get(keyTurnoData)!;
+    if (!mapaTurno.has(secao)) mapaTurno.set(secao, new Set<string>());
+    if (item) mapaTurno.get(secao)!.add(item);
 
     const ajuste =
       Math.abs(Number(row.reposicao || 0)) +
@@ -512,13 +723,24 @@ export async function obterDashboardEstatistico(vtr: string, days = 30): Promise
   });
 
   const sessionList = Array.from(sessions.values());
-  const completedSessions = sessionList.filter(s => s.secoes.size >= totalSecoes);
-  const incompleteSessions = sessionList.filter(s => s.secoes.size < totalSecoes);
-
-  const completedByName = new Map<string, number>();
-  completedSessions.forEach(s => {
-    completedByName.set(s.servidor, (completedByName.get(s.servidor) || 0) + 1);
+  const sessoesGeraisMap = new Map<string, { minTs: number; maxTs: number; secoes: Set<string> }>();
+  submits.forEach((row) => {
+    const dateKey = toBvDateKey(row.data_hora);
+    const keyTurnoData = `${row.turno}__${dateKey}`;
+    const ts = new Date(row.data_hora).getTime();
+    const secao = String(row.secao || '');
+    const existing = sessoesGeraisMap.get(keyTurnoData);
+    if (!existing) {
+      sessoesGeraisMap.set(keyTurnoData, { minTs: ts, maxTs: ts, secoes: new Set(secao ? [secao] : []) });
+    } else {
+      existing.minTs = Math.min(existing.minTs, ts);
+      existing.maxTs = Math.max(existing.maxTs, ts);
+      if (secao) existing.secoes.add(secao);
+    }
   });
+  const sessoesGerais = Array.from(sessoesGeraisMap.values());
+  const completedSessions = sessoesGerais.filter(s => s.secoes.size >= totalSecoes);
+  const incompleteSessions = sessoesGerais.filter(s => s.secoes.size < totalSecoes);
 
   const avgTimeMin =
     completedSessions.length > 0
@@ -531,25 +753,129 @@ export async function obterDashboardEstatistico(vtr: string, days = 30): Promise
     ENFERMEIRO: new Set<string>(),
     MEDICO: new Set<string>(),
   };
+  const profissaoNormPorNome = new Map<string, string>();
+  const profissaoNormPorNomeNormalizado = new Map<string, string>();
   servidores.forEach(s => {
     const nome = String(s.nome || '');
     const profNorm = normalizar(String(s.profissao || ''));
+    profissaoNormPorNome.set(nome, profNorm);
+    profissaoNormPorNomeNormalizado.set(normalizar(nome), profNorm);
     if (isProfissao(profNorm, 'ENFERMEIRO')) servidoresByProf.ENFERMEIRO.add(nome);
     if (isProfissao(profNorm, 'MEDICO')) servidoresByProf.MEDICO.add(nome);
+  });
+
+  const getProfissaoNormByNome = (nome: string) =>
+    profissaoNormPorNome.get(nome) || profissaoNormPorNomeNormalizado.get(normalizar(nome)) || '';
+
+  const getSecoesAplicaveis = (servidor: string) => {
+    const profNorm = profissaoNormPorNome.get(servidor) || '';
+    const secoesAplicaveis = new Set<string>();
+    secoesSet.forEach((secao) => {
+      const responsaveis = responsaveisPorSecao.get(secao);
+      if (!responsaveis || responsaveis.size === 0) {
+        secoesAplicaveis.add(secao);
+        return;
+      }
+      let aplica = false;
+      responsaveis.forEach((respNorm) => {
+        if (responsavelCombinaComProfissao(respNorm, profNorm)) aplica = true;
+      });
+      if (aplica) secoesAplicaveis.add(secao);
+    });
+    if (secoesAplicaveis.size === 0) return new Set<string>(secoesSet);
+    return secoesAplicaveis;
+  };
+
+  const sessionSummaryByKey = new Map<
+    string,
+    {
+      secoesConcluidas: number;
+      secoesIncompletas: number;
+      secoesNaoRealizadas: number;
+      totalSecoes: number;
+      concluido: boolean;
+      taxaConclusao: number;
+    }
+  >();
+  sessionList.forEach((s) => {
+    const keyTurnoData = `${s.turno}__${s.dateKey}`;
+    const secoesConcluidasNoTurno = secoesPorTurnoData.get(keyTurnoData) || s.secoes;
+    const itensDoTurno = itensPorSecaoTurnoData.get(keyTurnoData) || new Map<string, Set<string>>();
+    const aplicaveis = getSecoesAplicaveis(s.servidor);
+    let concluidas = 0;
+    let incompletas = 0;
+    let naoRealizadas = 0;
+    aplicaveis.forEach((secao) => {
+      const totalItensSecao = totalItensPorSecao.get(secao) || 0;
+      const enviados = itensDoTurno.get(secao)?.size || (secoesConcluidasNoTurno.has(secao) ? 1 : 0);
+      if (totalItensSecao <= 0) {
+        concluidas += 1;
+      } else if (enviados >= totalItensSecao) {
+        concluidas += 1;
+      } else if (enviados > 0) {
+        incompletas += 1;
+      } else {
+        naoRealizadas += 1;
+      }
+    });
+    const totalAplicavel = aplicaveis.size || 1;
+    const concluidoAplicavel = concluidas >= totalAplicavel;
+    const taxaConclusao = totalAplicavel > 0 ? round2((concluidas / totalAplicavel) * 100) : 0;
+    sessionSummaryByKey.set(s.key, {
+      secoesConcluidas: concluidas,
+      secoesIncompletas: incompletas,
+      secoesNaoRealizadas: naoRealizadas,
+      totalSecoes: totalAplicavel,
+      concluido: concluidoAplicavel,
+      taxaConclusao,
+    });
+  });
+
+  const acessosPorSessaoNome = new Map<string, number>();
+  const ultimaSessaoPorNome = new Map<string, SessionAgg>();
+  sessionList.forEach((s) => {
+    acessosPorSessaoNome.set(s.servidor, (acessosPorSessaoNome.get(s.servidor) || 0) + 1);
+    const atual = ultimaSessaoPorNome.get(s.servidor);
+    if (!atual || s.maxTs > atual.maxTs) {
+      ultimaSessaoPorNome.set(s.servidor, s);
+    }
+  });
+
+  const incompleteSessionsAplicavel = sessionList.filter((s) => {
+    const resumo = sessionSummaryByKey.get(s.key);
+    if (!resumo) return true;
+    if (resumo.concluido) {
+      return false;
+    }
+    return true;
   });
 
   const buildRankingProf = (profKey: 'ENFERMEIRO' | 'MEDICO') => {
     const names = Array.from(servidoresByProf[profKey]);
     return names
       .map(nome => {
-        const acessos = accessByName.get(nome) || 0;
-        const concluidos = completedByName.get(nome) || 0;
-        const taxaConclusao = acessos > 0 ? round2((concluidos / acessos) * 100) : 0;
-        return { nome, acessos, concluidos, taxaConclusao };
+        const acessos = acessosPorSessaoNome.get(nome) || 0;
+        const ultimaSessao = ultimaSessaoPorNome.get(nome);
+        const resumoUltima = ultimaSessao ? sessionSummaryByKey.get(ultimaSessao.key) : null;
+        const secoesConcluidas = resumoUltima?.secoesConcluidas || 0;
+        const totalSecoesAplicaveis = resumoUltima?.totalSecoes || 0;
+        const incompletos = resumoUltima?.secoesIncompletas || 0;
+        const naoRealizados = resumoUltima?.secoesNaoRealizadas || 0;
+        const taxaConclusao =
+          totalSecoesAplicaveis > 0 ? round2((secoesConcluidas / totalSecoesAplicaveis) * 100) : 0;
+        return {
+          nome,
+          acessos,
+          concluidos: `${secoesConcluidas}/${totalSecoesAplicaveis}`,
+          incompletos,
+          naoRealizados,
+          taxaConclusao,
+        };
       })
       .sort((a, b) => {
-        if (b.concluidos !== a.concluidos) return b.concluidos - a.concluidos;
         if (b.taxaConclusao !== a.taxaConclusao) return b.taxaConclusao - a.taxaConclusao;
+        if (b.incompletos !== a.incompletos) return a.incompletos - b.incompletos;
+        if (b.naoRealizados !== a.naoRealizados) return a.naoRealizados - b.naoRealizados;
         return b.acessos - a.acessos;
       })
       .slice(0, 10);
@@ -595,13 +921,23 @@ export async function obterDashboardEstatistico(vtr: string, days = 30): Promise
     return db - da;
   });
 
-  const turnosIncompletos = incompleteSessions
+  const rastreioAntecessorEnfermeiros = rastreioAntecessor.filter((r) => {
+    const profSucessor = getProfissaoNormByNome(String(r.sucessor || ''));
+    return isEnfermeiroProf(profSucessor);
+  });
+
+  const rastreioAntecessorMedicos = rastreioAntecessor.filter((r) => {
+    const profSucessor = getProfissaoNormByNome(String(r.sucessor || ''));
+    return isMedicoProf(profSucessor);
+  });
+
+  const turnosIncompletos = incompleteSessionsAplicavel
     .map(s => ({
       servidor: s.servidor,
       turno: s.turno,
       data: s.dateKey,
-      secoesConcluidas: s.secoes.size,
-      totalSecoes,
+      secoesConcluidas: sessionSummaryByKey.get(s.key)?.secoesConcluidas || 0,
+      totalSecoes: sessionSummaryByKey.get(s.key)?.totalSecoes || totalSecoes,
     }))
     .sort((a, b) => {
       const sa = a.secoesConcluidas / a.totalSecoes;
@@ -624,10 +960,14 @@ export async function obterDashboardEstatistico(vtr: string, days = 30): Promise
     rankingMedicamentos: toTopList(medsMap),
     rankingPsicotropicos: toTopList(psychoMap),
     picosAcesso,
-    rastreioAntecessor: rastreioAntecessor.slice(0, 20),
+    rastreioAntecessorEnfermeiros: rastreioAntecessorEnfermeiros.slice(0, 20),
+    rastreioAntecessorMedicos: rastreioAntecessorMedicos.slice(0, 20),
     rankingEnfermeiros: buildRankingProf('ENFERMEIRO'),
     rankingMedicos: buildRankingProf('MEDICO'),
     turnosIncompletos,
   };
 }
+
+
+
 

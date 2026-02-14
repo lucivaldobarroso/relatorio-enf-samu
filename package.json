@@ -1,0 +1,10 @@
+{
+  "name": "portal-samu-192-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix checklist run dev",
+    "build": "npm --prefix checklist run build",
+    "test": "npm --prefix checklist run test",
+    "lint": "npm --prefix checklist run lint"
+  }
+}

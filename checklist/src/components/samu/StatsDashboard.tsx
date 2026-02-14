@@ -56,6 +56,8 @@ function RankingTable({
               <th className="p-2 text-left">Nome</th>
               <th className="p-2 text-right">Acessos</th>
               <th className="p-2 text-right">Concluidos</th>
+              <th className="p-2 text-right">Incompleto</th>
+              <th className="p-2 text-right">Nao realizado</th>
               <th className="p-2 text-right">Taxa</th>
             </tr>
           </thead>
@@ -65,12 +67,14 @@ function RankingTable({
                 <td className="p-2 font-semibold">{row.nome}</td>
                 <td className="p-2 text-right">{row.acessos}</td>
                 <td className="p-2 text-right text-green-700">{row.concluidos}</td>
+                <td className="p-2 text-right text-amber-700">{row.incompletos}</td>
+                <td className="p-2 text-right text-red-700">{row.naoRealizados}</td>
                 <td className="p-2 text-right font-bold text-primary">{row.taxaConclusao.toFixed(1)}%</td>
               </tr>
             ))}
             {data.length === 0 && (
               <tr>
-                <td className="p-2 text-muted-foreground" colSpan={4}>
+                <td className="p-2 text-muted-foreground" colSpan={6}>
                   Sem dados no periodo.
                 </td>
               </tr>
@@ -253,30 +257,58 @@ const StatsDashboard = ({ data, loading, periodoDias, onChangePeriodoDias, onAtu
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border/60 bg-card/90 p-4 shadow-sm">
-          <h4 className="mb-3 font-orbitron text-sm font-bold text-primary">Rastreio de antecessor</h4>
-          <ChartContainer className="h-[280px] w-full" config={chartConfig}>
-            <BarChart data={data.rastreioAntecessor.slice(0, 10)}>
-              <CartesianGrid vertical={false} />
-              <XAxis dataKey="sucessor" tickLine={false} axisLine={false} />
-              <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    formatter={(value, name, item) => (
-                      <div className="text-xs">
-                        <div className="font-semibold">{item.payload.sucessor}</div>
-                        <div>Antecessor: {item.payload.antecessor}</div>
-                        <div>Turno: {item.payload.turno}</div>
-                        <div>Intervalo: {value} min</div>
-                      </div>
-                    )}
-                  />
-                }
-              />
-              <Bar dataKey="intervaloMin" fill="var(--color-acessos)" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ChartContainer>
+        <div className="rounded-2xl border border-border/60 bg-card/90 p-4 shadow-sm space-y-4">
+          <div>
+            <h4 className="mb-2 font-orbitron text-sm font-bold text-primary">Rastreio de antecessor - Enfermeiro</h4>
+            <ChartContainer className="h-[130px] w-full" config={chartConfig}>
+              <BarChart data={data.rastreioAntecessorEnfermeiros.slice(0, 6)}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="sucessor" tickLine={false} axisLine={false} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value, name, item) => (
+                        <div className="text-xs">
+                          <div className="font-semibold">{item.payload.sucessor}</div>
+                          <div>Antecessor: {item.payload.antecessor}</div>
+                          <div>Turno: {item.payload.turno}</div>
+                          <div>Intervalo: {value} min</div>
+                        </div>
+                      )}
+                    />
+                  }
+                />
+                <Bar dataKey="intervaloMin" fill="var(--color-acessos)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ChartContainer>
+          </div>
+
+          <div>
+            <h4 className="mb-2 font-orbitron text-sm font-bold text-primary">Rastreio de antecessor - Medico</h4>
+            <ChartContainer className="h-[130px] w-full" config={chartConfig}>
+              <BarChart data={data.rastreioAntecessorMedicos.slice(0, 6)}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="sucessor" tickLine={false} axisLine={false} />
+                <YAxis allowDecimals={false} tickLine={false} axisLine={false} />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value, name, item) => (
+                        <div className="text-xs">
+                          <div className="font-semibold">{item.payload.sucessor}</div>
+                          <div>Antecessor: {item.payload.antecessor}</div>
+                          <div>Turno: {item.payload.turno}</div>
+                          <div>Intervalo: {value} min</div>
+                        </div>
+                      )}
+                    />
+                  }
+                />
+                <Bar dataKey="intervaloMin" fill="var(--color-acessos)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ChartContainer>
+          </div>
         </div>
       </div>
     </div>

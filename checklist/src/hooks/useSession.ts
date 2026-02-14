@@ -20,7 +20,10 @@ export function useSession() {
     const stored = localStorage.getItem(SESSION_KEY);
     if (stored) {
       try {
-        setUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored) as UserSession;
+        const hydrated = { ...parsed, turno: '' };
+        setUser(hydrated);
+        localStorage.setItem(SESSION_KEY, JSON.stringify(hydrated));
       } catch {
         localStorage.removeItem(SESSION_KEY);
       }

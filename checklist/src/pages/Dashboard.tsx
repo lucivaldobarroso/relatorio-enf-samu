@@ -5,7 +5,7 @@ import { normalizar } from '@/lib/utils';
 import { ChecklistItem, TurnoKey } from '@/types/samu';
 import { DashboardEstatisticoData, obterHistoricoRecente } from '@/services/samuService';
 import { toast } from 'sonner';
-import { Building2, Menu, PartyPopper } from 'lucide-react';
+import { Building2, History, Menu, PartyPopper } from 'lucide-react';
 import Sidebar from '@/components/samu/Sidebar';
 import ShiftBar from '@/components/samu/ShiftBar';
 import ChecklistSection, { ChecklistPayload } from '@/components/samu/ChecklistSection';
@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [periodoDias, setPeriodoDias] = useState(30);
   const [showParabens, setShowParabens] = useState(false);
   const [showSucesso, setShowSucesso] = useState(false);
+  const [showConfirmSair, setShowConfirmSair] = useState(false);
   const [parabensExibido, setParabensExibido] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -115,7 +116,6 @@ const Dashboard = () => {
 
   const handleOpenCME = () => {
     if (!user?.turno) {
-      toast.warning('Selecione seu HORÁRIO DE PLANTÃO primeiro!');
       return;
     }
     setModoCME(true);
@@ -130,12 +130,21 @@ const Dashboard = () => {
 
   const handleOpenEstatisticas = () => {
     if (!user?.turno) {
-      toast.warning('Selecione seu HORÁRIO DE PLANTÃO primeiro!');
       return;
     }
     setModoCME(false);
     setSecaoAtual('');
     setViewMode('stats');
+    setSidebarOpen(false);
+  };
+
+  const handleOpenHistorico = () => {
+    if (!user?.turno) {
+      return;
+    }
+    setModoCME(false);
+    setSecaoAtual('');
+    setViewMode('none');
     setSidebarOpen(false);
   };
 
@@ -146,7 +155,7 @@ const Dashboard = () => {
   }, [viewMode, periodoDias, user?.turno, loadStats]);
 
   const handleEnviarSecao = async (itensData: ChecklistPayload[]) => {
-    if (!user) return;
+    if (!user) return false;
     setLoading(true);
     setLoadingText('SALVANDO NO BANCO...');
 
@@ -166,18 +175,21 @@ const Dashboard = () => {
         setTimeout(() => setShowSucesso(false), 3000);
         await loadData();
         verificarConclusaoGeral();
+        return true;
       } else {
         toast.error('Erro ao salvar: ' + res.msg);
+        return false;
       }
     } catch {
       toast.error('Erro ao conectar com o servidor.');
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
   const handleEnviarItem = async (itemData: ChecklistPayload) => {
-    if (!user) return;
+    if (!user) return false;
 
     try {
       const res = await salvarChecklist({
@@ -216,9 +228,7 @@ const Dashboard = () => {
   };
 
   const handleSair = () => {
-    if (confirm('Deseja realmente sair do sistema?')) {
-      logout();
-    }
+    setShowConfirmSair(true);
   };
 
   const profNormal = normalizar(user?.profissao);
@@ -227,6 +237,7 @@ const Dashboard = () => {
     profNormal.includes('COORDENADOR') ||
     profNormal.includes('CME') ||
     profNormal.includes('COORD');
+  const turnoSelecionado = !!user?.turno;
 
   const itensSecaoAtual = bancoItens.filter(i => i.secao === secaoAtual);
 
@@ -266,6 +277,11 @@ const Dashboard = () => {
             </button>
             <div>
               <strong className="text-sm">{user?.nome || '---'}</strong>
+              {user?.codigo_servidor ? (
+                <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary align-middle">
+                  {user.codigo_servidor}
+                </span>
+              ) : null}
               <br />
               <small className="text-muted-foreground text-xs">{user?.profissao || '---'}</small>
             </div>
@@ -274,7 +290,12 @@ const Dashboard = () => {
             {showCME && (
               <button
                 onClick={handleOpenCME}
-                className="bg-accent text-accent-foreground px-3 py-2 rounded-lg font-orbitron text-xs font-bold uppercase shadow hover:scale-105 transition"
+                disabled={!turnoSelecionado}
+                className={`px-3 py-2 rounded-lg font-orbitron text-xs font-bold uppercase shadow transition ${
+                  turnoSelecionado
+                    ? 'bg-accent text-accent-foreground hover:scale-105 cursor-pointer'
+                    : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
+                }`}
               >
                 <span className="inline-flex items-center gap-1">
                   <Building2 size={14} />
@@ -282,6 +303,20 @@ const Dashboard = () => {
                 </span>
               </button>
             )}
+            <button
+              onClick={handleOpenHistorico}
+              disabled={!turnoSelecionado}
+              className={`px-3 py-2 rounded-lg font-orbitron text-xs font-bold uppercase shadow transition border ${
+                turnoSelecionado
+                  ? 'bg-primary/10 border-primary/30 text-primary hover:scale-105 cursor-pointer'
+                  : 'bg-muted border-border text-muted-foreground cursor-not-allowed opacity-60'
+              }`}
+            >
+              <span className="inline-flex items-center gap-1">
+                <History size={14} />
+                ULTIMOS ACESSOS
+              </span>
+            </button>
             <div className="font-bold text-sm whitespace-nowrap">VTR: {user?.vtr || '---'}</div>
           </div>
         </div>
@@ -358,6 +393,33 @@ const Dashboard = () => {
             >
               OK
             </button>
+          </div>
+        </div>
+      )}
+
+      {showConfirmSair && (
+        <div className="fixed inset-0 bg-black/80 flex justify-center items-center z-[10000] backdrop-blur-sm">
+          <div className="bg-card p-10 rounded-3xl text-center max-w-md border-4 border-primary">
+            <div className="text-5xl mb-5">⚠️</div>
+            <h2 className="text-primary font-orbitron font-bold text-xl mb-4">CONFIRMAR SAÍDA</h2>
+            <p className="text-lg mb-5">Deseja realmente sair do sistema?</p>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setShowConfirmSair(false)}
+                className="bg-transparent border border-muted-foreground text-muted-foreground px-6 py-3 rounded-xl font-bold cursor-pointer"
+              >
+                CANCELAR
+              </button>
+              <button
+                onClick={() => {
+                  setShowConfirmSair(false);
+                  logout();
+                }}
+                className="samu-gradient text-primary-foreground px-6 py-3 rounded-xl font-bold cursor-pointer"
+              >
+                SAIR
+              </button>
+            </div>
           </div>
         </div>
       )}

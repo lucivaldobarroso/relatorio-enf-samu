@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession, fetchDadosIniciais, realizarLogin, validarIdentidadeCadastro, registrarSenha } from '@/hooks/useSession';
 import { toast } from 'sonner';
@@ -65,6 +65,13 @@ const Login = () => {
     setValorDesafio('');
   };
 
+  const obterSaudacaoPorHorario = () => {
+    const horaAtual = new Date().getHours();
+    if (horaAtual < 12) return 'Bom dia';
+    if (horaAtual < 18) return 'Boa tarde';
+    return 'Boa noite';
+  };
+
   const handleEntrar = async () => {
     setLoginErro('');
     if (!loginVtr || !loginNome) {
@@ -72,8 +79,9 @@ const Login = () => {
       return;
     }
 
+    const saudacao = obterSaudacaoPorHorario();
     setLoading(true);
-    setLoadingText('AUTENTICANDO NO PORTAL SAMU 192...');
+    setLoadingText(`${saudacao}! Bem-vindo ao check list do SAMU ${loginNome}.`);
 
     const res = await realizarLogin({
       nome: loginNome,
@@ -89,12 +97,13 @@ const Login = () => {
     if (res.logado) {
       login({
         nome: res.nome!,
+        codigo_servidor: res.codigo_servidor || undefined,
         vtr: loginVtr,
-        profissao: res.profissao || 'Não Informado',
+        profissao: res.profissao || 'NÃ£o Informado',
         turno: '',
       });
     } else {
-      setLoginErro(res.msg || 'Falha na conexão.');
+      setLoginErro(res.msg || 'Falha na conexÃ£o.');
       gerarDesafio();
     }
   };
@@ -118,13 +127,13 @@ const Login = () => {
       setLinhaUser(res.row!);
       setShowSenhaFields(true);
     } else {
-      toast.error(res.msg || 'Erro ao validar informações.');
+      toast.error(res.msg || 'Erro ao validar informaÃ§Ãµes.');
     }
   };
 
   const handleSalvarSenha = async () => {
     if (s1 !== s2 || s1 === '') {
-      toast.error('As senhas não conferem ou estão vazias!');
+      toast.error('As senhas nÃ£o conferem ou estÃ£o vazias!');
       return;
     }
 
@@ -179,7 +188,7 @@ const Login = () => {
       {screen === 'login' ? (
         <div className="w-full max-w-md p-8 glass border-2 border-white rounded-3xl text-center shadow-xl">
           <h1 className="font-orbitron text-primary text-2xl font-bold mb-2">SAMU 192</h1>
-          <p className="text-primary font-bold mb-6 text-sm">CHECK LIST DA USA - Suporte Avançado de Vida</p>
+          <p className="text-primary font-bold mb-6 text-sm">CHECK LIST DA USA - Suporte AvanÃ§ado de Vida</p>
 
           <div className="mb-5 text-left">
             <label className="block mb-2 text-primary text-xs font-bold uppercase">Viatura (VTR)</label>
@@ -241,7 +250,7 @@ const Login = () => {
           {loginErro && <p className="text-destructive text-sm mt-4 font-bold">{loginErro}</p>}
 
           <p className="text-sm mt-5 text-muted-foreground">
-            Ainda não tem acesso?{' '}
+            Ainda nÃ£o tem acesso?{' '}
             <span
               className="text-destructive font-bold cursor-pointer underline"
               onClick={() => { resetForms(); setScreen('cadastro'); }}
@@ -252,7 +261,7 @@ const Login = () => {
         </div>
       ) : (
         <div className="w-full max-w-md p-8 glass border-2 border-white rounded-3xl text-center shadow-xl">
-          <h1 className="font-orbitron text-primary text-2xl font-bold mb-6">ATIVAÇÃO DE ACESSO</h1>
+          <h1 className="font-orbitron text-primary text-2xl font-bold mb-6">ATIVAÃ‡ÃƒO DE ACESSO</h1>
 
           {!showSenhaFields ? (
             <>
@@ -275,10 +284,10 @@ const Login = () => {
                   onChange={e => setCadProf(e.target.value)}
                   className="w-full p-3.5 bg-card border border-input rounded-xl text-foreground outline-none focus:border-primary transition"
                 >
-                  <option value="" disabled>Escolha sua profissão...</option>
+                  <option value="" disabled>Escolha sua profissÃ£o...</option>
                   <option>Enfermeiro</option>
-                  <option>Médico</option>
-                  <option>Técnico de Enfermagem</option>
+                  <option>MÃ©dico</option>
+                  <option>TÃ©cnico de Enfermagem</option>
                   <option>Condutor</option>
                 </select>
               </div>
@@ -289,7 +298,7 @@ const Login = () => {
                   type="text"
                   value={cadCpf}
                   onChange={e => setCadCpf(e.target.value)}
-                  placeholder="Digite apenas números"
+                  placeholder="Digite apenas nÃºmeros"
                   className="w-full p-3.5 bg-card border border-input rounded-xl text-foreground outline-none focus:border-primary transition"
                 />
               </div>
@@ -298,7 +307,7 @@ const Login = () => {
                 <label className="block mb-2 text-primary text-xs font-bold uppercase">Data de Nascimento</label>
                 <div className="flex gap-2">
                   <input type="text" value={cadDia} onChange={e => setCadDia(e.target.value)} placeholder="Dia" maxLength={2} className="flex-1 p-3.5 bg-card border border-input rounded-xl text-foreground text-center outline-none focus:border-primary transition" />
-                  <input type="text" value={cadMes} onChange={e => setCadMes(e.target.value)} placeholder="Mês" maxLength={2} className="flex-1 p-3.5 bg-card border border-input rounded-xl text-foreground text-center outline-none focus:border-primary transition" />
+                  <input type="text" value={cadMes} onChange={e => setCadMes(e.target.value)} placeholder="MÃªs" maxLength={2} className="flex-1 p-3.5 bg-card border border-input rounded-xl text-foreground text-center outline-none focus:border-primary transition" />
                   <input type="text" value={cadAno} onChange={e => setCadAno(e.target.value)} placeholder="Ano" maxLength={4} className="flex-1 p-3.5 bg-card border border-input rounded-xl text-foreground text-center outline-none focus:border-primary transition" />
                 </div>
               </div>
@@ -307,7 +316,7 @@ const Login = () => {
                 onClick={handleValidarCadastro}
                 className="w-full p-4 samu-gradient-red border-none rounded-xl text-primary-foreground font-orbitron font-bold text-sm cursor-pointer uppercase shadow-lg hover:-translate-y-0.5 transition"
               >
-                VERIFICAR INFORMAÇÕES
+                VERIFICAR INFORMAÃ‡Ã•ES
               </button>
             </>
           ) : (
@@ -356,3 +365,4 @@ const Login = () => {
 };
 
 export default Login;
+

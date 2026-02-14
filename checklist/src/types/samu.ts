@@ -1,6 +1,7 @@
 export interface Servidor {
   id: number;
   nome: string;
+  codigo_servidor?: string | null;
   cpf: string;
   profissao: string;
   data_nasc: string;
@@ -52,6 +53,7 @@ export interface SubmitChecklist {
 
 export interface UserSession {
   nome: string;
+  codigo_servidor?: string;
   vtr: string;
   profissao: string;
   turno: string;

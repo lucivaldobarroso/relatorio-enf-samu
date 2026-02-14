@@ -1,4 +1,5 @@
-﻿import { ChecklistItem } from '@/types/samu';
+import { ChecklistItem } from '@/types/samu';
+import { normalizar } from '@/lib/utils';
 
 interface SidebarProps {
   secoes: string[];
@@ -39,21 +40,42 @@ const Sidebar = ({
         }}
       >
         {secoes.map(s => {
-          const concluido = bancoItens.some(i => i.secao === s && i.concluido_turno);
+          const itensSecao = bancoItens.filter(i => i.secao === s);
+          const itensValidos = itensSecao.filter(i => normalizar(i.estoque) !== 'NAO TEM');
+          const totalItens = itensValidos.length;
+          const totalConcluidos = itensValidos.filter(i => i.concluido_turno).length;
+          const concluido = totalItens > 0 && totalConcluidos === totalItens;
+          const parcial = totalConcluidos > 0 && totalConcluidos < totalItens;
+          const somenteIndisponivel = totalItens === 0 && itensSecao.length > 0;
           const isActive = secaoAtual === s;
 
           return (
             <button
               key={s}
               onClick={() => onSelectSecao(s)}
-              className={`w-full p-4 border-none bg-transparent text-left cursor-pointer border-b border-border/10 text-sm font-medium relative transition-colors
-                ${isActive ? 'bg-primary/10 text-primary border-r-4 border-r-primary font-bold' : 'text-foreground/70 hover:bg-primary/5'}`}
+              className={`group w-full p-4 border-none bg-transparent text-left cursor-pointer border-b border-border/10 text-sm relative transition-colors
+                ${isActive ? 'bg-primary/15 text-primary border-r-4 border-r-primary font-extrabold tracking-[0.01em] shadow-[inset_0_0_0_1px_rgba(25,96,184,0.25)]' : 'text-foreground/70'}
+                ${
+                  !isActive
+                    ? (concluido || somenteIndisponivel)
+                      ? 'hover:bg-green-50 hover:text-green-800 hover:font-bold'
+                      : parcial
+                        ? 'hover:bg-amber-50 hover:text-amber-800 hover:font-bold'
+                        : 'hover:bg-red-50 hover:text-red-800 hover:font-bold'
+                    : ''
+                }`}
             >
               {s}
               {turnoSelecionado && (
                 <span
-                  className={`absolute bottom-1 left-[10%] w-[80%] h-1 rounded-sm transition-colors
-                    ${concluido ? 'bg-green-500 shadow-[0_0_5px_rgba(0,200,81,0.5)]' : 'bg-red-400'}`}
+                  className={`absolute bottom-1 left-[10%] w-[80%] h-1 rounded-sm transition-colors group-hover:h-[5px]
+                    ${
+                      concluido || somenteIndisponivel
+                        ? 'bg-green-500 shadow-[0_0_6px_rgba(0,200,81,0.55)]'
+                        : parcial
+                          ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]'
+                          : 'bg-red-400 shadow-[0_0_5px_rgba(239,68,68,0.3)]'
+                    }`}
                 />
               )}
             </button>
@@ -80,3 +102,4 @@ const Sidebar = ({
 };
 
 export default Sidebar;
+

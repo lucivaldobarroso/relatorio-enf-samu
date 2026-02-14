@@ -13,7 +13,8 @@ The system is a client-side SPA for USA SAMU 192 checklist operations.
 
 1. User authenticates on Login page.
 2. Session is persisted in `localStorage` by `useSession`.
-3. Dashboard loads checklist config and current VTR/turn data.
+3. On reload, session keeps user identity/VTR and resets selected turn (`turno`).
+4. Dashboard loads checklist config and current VTR/turn data.
 4. User saves item/section payloads to `submits_checklist`.
 5. History and statistics are calculated from `logs_acesso` and `submits_checklist`.
 
@@ -38,6 +39,14 @@ The system is a client-side SPA for USA SAMU 192 checklist operations.
 - Strongly typed front-end with TypeScript.
 - Business rules consolidated in service layer to keep page components thinner.
 - Mobile-first behavior in dashboard (`100dvh`, sticky top bar, responsive sidebar).
+- GitHub Pages deployment with Vite `base=/checklist/` and static redirect entry (`samu.html`).
+
+## Domain rules reflected in service layer
+
+- Completion is calculated by selected turn and VTR context.
+- `NOITE` shift keeps continuity across midnight window (18:00 -> 06:00).
+- `INDISPONIVEL CME` items are excluded from pending counts.
+- Role-aware metrics use applicable sections (role + team sections).
 
 ## Risks and next improvements
 
