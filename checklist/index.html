@@ -12,6 +12,13 @@
     <link rel="icon" href="/favicon.ico" />
     <title>CHECK LIST - USA</title>
     <meta name="description" content="Checklist USA SAMU 192" />
+    <script>
+      const host = window.location.hostname;
+      const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+      if (!isLocal) {
+        window.location.replace('/checklist/samu.html');
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
