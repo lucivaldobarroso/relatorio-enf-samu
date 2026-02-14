@@ -9,19 +9,29 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="CHECK LIST - USA" />
     <meta name="format-detection" content="telephone=no, date=no, email=no, address=no" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="/checklist/favicon.ico" />
     <title>CHECK LIST - USA</title>
     <meta name="description" content="Checklist USA SAMU 192" />
     <script>
       const host = window.location.hostname;
       const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '::1';
       if (!isLocal) {
-        window.location.replace('/checklist/samu.html');
+        const css = document.createElement('link');
+        css.rel = 'stylesheet';
+        css.href = '/checklist/assets/app.css';
+        document.head.appendChild(css);
       }
     </script>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module">
+      const host = window.location.hostname;
+      const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = isLocal ? '/src/main.tsx' : '/checklist/assets/app.js';
+      document.body.appendChild(script);
+    </script>
   </body>
 </html>
