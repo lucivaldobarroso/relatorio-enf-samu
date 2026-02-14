@@ -384,17 +384,38 @@ export async function obterHistoricoRecente(vtr: string) {
   const results = await Promise.all(
     logs.map(async (log) => {
       const logDate = new Date(log.data_hora);
-      const startOfDay = new Date(logDate);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(logDate);
-      endOfDay.setHours(23, 59, 59, 999);
+      const bvHour = parseInt(
+        logDate.toLocaleTimeString('en-GB', {
+          timeZone: 'America/Boa_Vista',
+          hour: '2-digit',
+          hour12: false,
+        }),
+        10,
+      );
+      const shiftDate = new Date(logDate);
+      const startOfRange = new Date(logDate);
+      const endOfRange = new Date(logDate);
+
+      if (bvHour >= 18) {
+        startOfRange.setHours(18, 0, 0, 0);
+        endOfRange.setDate(endOfRange.getDate() + 1);
+        endOfRange.setHours(6, 59, 59, 999);
+      } else if (bvHour < 6) {
+        shiftDate.setDate(shiftDate.getDate() - 1);
+        startOfRange.setDate(startOfRange.getDate() - 1);
+        startOfRange.setHours(18, 0, 0, 0);
+        endOfRange.setHours(6, 59, 59, 999);
+      } else {
+        startOfRange.setHours(0, 0, 0, 0);
+        endOfRange.setHours(23, 59, 59, 999);
+      }
 
       const { data: submits } = await supabase
         .from('submits_checklist')
         .select('secao,item,turno,data_hora,servidor')
         .eq('vtr', vtr)
-        .gte('data_hora', startOfDay.toISOString())
-        .lte('data_hora', endOfDay.toISOString());
+        .gte('data_hora', startOfRange.toISOString())
+        .lte('data_hora', endOfRange.toISOString());
 
       const submitsOrdenados = [...(submits || [])].sort(
         (a, b) => new Date(String(b.data_hora || '')).getTime() - new Date(String(a.data_hora || '')).getTime(),
@@ -402,7 +423,7 @@ export async function obterHistoricoRecente(vtr: string) {
       const submitsServidor = submitsOrdenados.filter(
         (s) => String((s as { servidor?: string }).servidor || '') === String(log.nome_servidor || ''),
       );
-      const turnoDetectado = String(submitsServidor[0]?.turno || submitsOrdenados[0]?.turno || '---');
+      const turnoDetectado = String(submitsServidor[0]?.turno || submitsOrdenados[0]?.turno || (bvHour >= 18 || bvHour < 6 ? 'NOITE' : '---'));
       const submitsDoTurno =
         turnoDetectado === '---'
           ? submitsOrdenados
@@ -454,7 +475,7 @@ export async function obterHistoricoRecente(vtr: string) {
         turno: turnoDetectado,
         data: new Date(log.data_hora).toLocaleString('pt-BR', { timeZone: 'America/Boa_Vista' }),
         ts: new Date(log.data_hora).getTime(),
-        dateKey: new Date(log.data_hora).toLocaleDateString('sv-SE', { timeZone: 'America/Boa_Vista' }),
+        dateKey: shiftDate.toLocaleDateString('sv-SE', { timeZone: 'America/Boa_Vista' }),
         secoes_ok: secoesOk,
         secoes_incompletas: secoesIncompletas,
         resumo_conclusao: `${secoesConcluidas}/${totalSecoes} secoes (${percentualConclusao}%)`,
