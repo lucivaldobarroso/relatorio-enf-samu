@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="light">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Operacional SAMU/BV</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        lb: {
+                            navy: "#0F2B57",
+                            grey: "#607089",
+                        },
+                        navy: {
+                            850: "#061226",
+                            900: "#0A1E3F",
+                            950: "#07142A",
+                        },
+                        gold: "#F2B827",
+                        cyan: "#19D4FF",
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            letter-spacing: 0.01em;
+        }
+
+        .glass-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark .glass-card {
+            background: linear-gradient(160deg, rgba(11, 23, 43, 0.85), rgba(8, 24, 52, 0.72));
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(30, 199, 255, 0.2);
+            box-shadow: 0 12px 30px -16px rgba(0, 0, 0, 0.7);
+        }
+
+        .light .glass-card {
+            background: linear-gradient(155deg, rgba(255, 255, 255, 0.96), rgba(243, 248, 255, 0.92));
+            border: 1px solid rgba(15, 43, 87, 0.14);
+            box-shadow: 0 12px 28px -18px rgba(12, 36, 79, 0.35);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .dark .glass-card:hover {
+            background: linear-gradient(160deg, rgba(10, 25, 48, 0.92), rgba(9, 33, 68, 0.78));
+            border-color: rgba(25, 212, 255, 0.45);
+            box-shadow: 0 26px 45px -20px rgba(7, 31, 74, 0.75);
+        }
+
+        .light .glass-card:hover {
+            border-color: rgba(15, 43, 87, 0.4);
+            box-shadow: 0 24px 34px -16px rgba(10, 30, 66, 0.28);
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .ticker-animation {
+            animation: ticker 30s linear infinite;
+        }
+
+        .hero-overlay {
+            transition: background 0.5s ease;
+        }
+
+        .dark .hero-overlay {
+            background:
+                radial-gradient(circle at 20% 20%, rgba(25, 212, 255, 0.14), transparent 30%),
+                radial-gradient(circle at 80% 12%, rgba(242, 184, 39, 0.12), transparent 28%),
+                linear-gradient(to bottom, rgba(3, 9, 22, 0.72) 0%, rgba(3, 10, 24, 0.96) 100%);
+        }
+
+        .light .hero-overlay {
+            background:
+                radial-gradient(circle at 15% 18%, rgba(25, 212, 255, 0.2), transparent 34%),
+                radial-gradient(circle at 82% 10%, rgba(242, 184, 39, 0.15), transparent 30%),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.58) 0%, rgba(245, 250, 255, 0.97) 100%);
+        }
+
+        /* Login Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(27, 54, 93, 0.1);
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content,
+        .modal-content * {
+            box-sizing: border-box;
+        }
+
+        .dark .modal-content {
+            background: rgba(15, 23, 42, 0.95);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #1B365D;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .close-btn:hover {
+            opacity: 1;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            color: #1B365D;
+        }
+
+        .dark .input-group label {
+            color: #00E5FF;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .input-group select {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .dark .input-group input {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .dark .input-group select {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #1B365D;
+            box-shadow: 0 0 0 2px rgba(27, 54, 93, 0.2);
+        }
+
+        .input-group select:focus {
+            outline: none;
+            border-color: #1B365D;
+            box-shadow: 0 0 0 2px rgba(27, 54, 93, 0.2);
+        }
+
+        #btnEntrar {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(90deg, #1B365D, #001F3F);
+            color: white;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #btnEntrar:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(27, 54, 93, 0.4);
+        }
+
+        .text-\[8px\] {
+            font-size: 9px !important;
+        }
+
+        .text-\[9px\] {
+            font-size: 10px !important;
+        }
+
+        .text-\[10px\] {
+            font-size: 11px !important;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes loading {
+            from {
+                width: 0%;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-BspqVOuJ.js"></script>
+</head>
+
+<body class="transition-colors duration-500 font-sans">
+    <div id="root"></div>
+</body>
+
+</html>
