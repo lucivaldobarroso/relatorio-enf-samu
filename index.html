@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-br" class="light">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Portal Operacional SAMU/BV</title>
     <link rel="icon" type="image/png" href="/assets/img-samuredondo.png" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
@@ -36,9 +36,15 @@
             }
         }
     </script>
-    <style>
+    <style>        html,
         body {
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100svh;
             letter-spacing: 0.01em;
+            -webkit-text-size-adjust: 100%;
         }
 
         .glass-card {
@@ -131,6 +137,7 @@
             animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             max-height: 92vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .modal-content,
@@ -285,8 +292,15 @@
                 width: 100%;
             }
         }
-    </style>
 
+        @supports (-webkit-touch-callout: none) {
+            .input-group input,
+            .input-group select,
+            .input-group textarea {
+                font-size: 16px;
+            }
+        }
+    </style>
     <script type="importmap">
 {
   "imports": {
@@ -296,11 +310,13 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/assets/index-C3pj2FSK.js"></script>
 </head>
 
 <body class="transition-colors duration-500 font-sans">
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
 </body>
 
 </html>
+
+
