@@ -1,0 +1,657 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Lucivaldo Oliveira Barroso">
+  <meta name="description" content="Avaliação e simulador de provas de RCP com questões SBV e SAVC, correção automática e ranking de desempenho. Autor: Lucivaldo Oliveira Barroso.">
+  <meta name="keywords" content="RCP, SBV, SAVC, avaliação, simulador, AHA, treinamento, Lucivaldo Oliveira Barroso">
+  <meta name="robots" content="index, follow">
+  <title>AVALIAÇÃO DE RCP</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef3f9; color: #223; margin: 0; padding: 20px; position: relative; overflow-x: hidden; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 16% 20%, rgba(122, 201, 211, .35) 0%, rgba(122, 201, 211, 0) 42%),
+        radial-gradient(circle at 85% 12%, rgba(196, 225, 185, .35) 0%, rgba(196, 225, 185, 0) 38%),
+        url("./assets/img-samuredondo.png") center 42% / min(60vw, 560px) no-repeat;
+      opacity: .22;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 26px; border-radius: 14px; box-shadow: 0 10px 28px rgba(0,0,0,.1); }
+    h1, h2, h3 { margin: 0; }
+    h1 { text-align: center; color: #13294b; font-size: 52px; }
+    .sub { text-align: center; color: #4f6282; margin: 10px 0 18px; font-size: 24px; }
+
+    .hidden { display: none !important; }
+
+    .card { border: 1px solid #c8d4e6; border-radius: 12px; padding: 14px; background: #f8fbff; }
+    .title-chip { display: inline-block; margin-bottom: 10px; background: #dfe8f6; color: #17345d; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; text-transform: uppercase; }
+    .ranking-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+
+    .grid-3 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .field { margin-bottom: 10px; min-width: 0; }
+    .field label { display:block; margin-bottom: 5px; font-weight: 700; color: #2c4468; }
+    .field input, .field select { width: 100%; max-width: 100%; padding: 10px 12px; border: 1px solid #b9c8dd; border-radius: 10px; font-size: 17px; background: #fff; min-width: 0; }
+
+    .menu { display:flex; justify-content:center; gap:12px; margin: 16px 0 8px; flex-wrap: wrap; }
+    .btn { padding: 12px 26px; border: 0; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 30px; color: #fff; transition: .2s; }
+    .btn:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-sbv { background: #1976d2; }
+    .btn-savc { background: #d32f2f; }
+    .btn-sec { background: #4f6282; font-size: 22px; padding: 12px 20px; }
+    .home-actions { flex-wrap: nowrap; }
+    .home-actions .btn { font-size: 20px; padding: 12px 18px; white-space: nowrap; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border-bottom: 1px solid #d9e4f2; padding: 8px 6px; text-align: left; font-size: 20px; }
+    th { color: #2f4d75; }
+
+    /* Tela da prova (estilo antigo) */
+    #quiz-title { text-align:center; color:#b71c1c; margin: 0 0 14px; }
+    .quiz-meta { text-align:center; margin: 0 0 14px; color: #1d3f67; font-weight: 700; }
+    .question-block { margin-bottom: 22px; padding: 14px; border-left: 5px solid #ddd; background-color: #fafafa; border-radius: 4px; }
+    .question-title { font-weight: bold; margin-bottom: 10px; font-size: 1.04em; }
+    .options label { display: block; margin-bottom: 8px; cursor: pointer; padding: 8px; border-radius: 5px; transition: background .2s; }
+    .options label:hover { background-color: #e0e0e0; }
+    .correct { background-color: #c8e6c9 !important; border: 1px solid #4caf50; }
+    .incorrect { background-color: #ffcdd2 !important; border: 1px solid #f44336; text-decoration: line-through; }
+    .feedback { display: none; margin-top: 10px; padding: 10px; background-color: #e3f2fd; border-left: 4px solid #1976d2; font-size: .9em; }
+    #submit-btn { width: 100%; background:#388e3c; padding: 14px; font-size: 17px; border:0; border-radius: 8px; color:#fff; font-weight:700; cursor:pointer; }
+    #results { margin-top: 16px; padding: 18px; text-align: center; font-size: 22px; font-weight: 700; background: #fff3e0; display: none; border-radius: 8px; border: 2px solid #1976d2; }
+    .timer-fab { position: fixed; top: 16px; right: 16px; z-index: 1000; background: #17345d; color: #fff; border-radius: 999px; padding: 10px 16px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+    .timer-fab.danger { background: #b71c1c; }
+    .modal { position: fixed; inset: 0; z-index: 1200; display: grid; place-items: center; background: rgba(15, 26, 43, .52); }
+    .modal-card { width: min(520px, calc(100% - 24px)); background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 10px 28px rgba(0,0,0,.24); }
+    .modal-card h3 { margin-bottom: 10px; color: #13294b; }
+    .modal-card p { margin: 0 0 14px; color: #2e3f59; font-size: 18px; line-height: 1.4; }
+    .loading-overlay { position: fixed; inset: 0; z-index: 1300; display: grid; place-items: center; background: rgba(15, 26, 43, .45); }
+    .loading-box { width: min(500px, calc(100% - 24px)); background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 10px 28px rgba(0,0,0,.24); text-align: center; }
+    .loading-box h3 { color: #17345d; margin-bottom: 8px; }
+    .loading-box p { color: #324867; margin: 0; font-size: 18px; }
+    .site-footer { margin-top: 18px; padding-top: 12px; border-top: 1px solid #d9e4f2; text-align: center; color: #4a607f; font-size: 14px; }
+    .footer-brand { display: inline-flex; align-items: center; gap: 10px; background: #f7fbff; border: 1px solid #d2deef; border-radius: 999px; padding: 8px 14px; }
+    .footer-brand img { height: 34px; width: auto; object-fit: contain; }
+    .dev-fab {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 1100;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,.96);
+      border: 1px solid #ccd8ea;
+      box-shadow: 0 8px 20px rgba(0,0,0,.18);
+      border-radius: 999px;
+      padding: 8px 12px 8px 8px;
+      text-decoration: none;
+      color: #16345b;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      backdrop-filter: blur(4px);
+    }
+    .dev-fab .video-wrap {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #c4d1e5;
+      background: #fff;
+      flex: 0 0 auto;
+    }
+    .dev-fab video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .dev-fab:hover { transform: translateY(-1px); }
+
+    @media (max-width: 980px) {
+      h1 { font-size: 40px; }
+      .sub { font-size: 20px; }
+      .grid-3, .ranking-row { grid-template-columns: 1fr; }
+      .btn { font-size: 24px; }
+      .home-actions { flex-wrap: wrap; }
+      th, td { font-size: 16px; }
+      .dev-fab { right: 10px; bottom: 10px; font-size: 11px; gap: 8px; padding-right: 10px; }
+      .dev-fab .video-wrap { width: 36px; height: 36px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- TELA INICIAL -->
+  <section id="home-screen">
+    <h1>AVALIAÇÃO DE RCP - 2026</h1>
+    <p class="sub">Preencha seus dados, escolha a prova e responda 20 questões em até 20 minutos.</p>
+
+    <div class="card">
+      <span class="title-chip">Identificação do Aluno</span>
+
+      <div class="grid-3">
+        <div class="field">
+          <label>Nome completo</label>
+          <input id="nome" placeholder="Digite nome e sobrenome" />
+        </div>
+        <div class="field">
+          <label>Profissão</label>
+          <select id="profissao">
+            <option>ENFERMEIRO</option>
+            <option>MEDICO</option>
+            <option>TEC DE ENFERMAGEM</option>
+            <option>CONDUTOR</option>
+            <option>OUTROS</option>
+          </select>
+        </div>
+        <div class="field" id="fieldOutraProfissao">
+          <label>Outra profissão</label>
+          <input id="outraProfissao" placeholder="Digite a profissão" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Aluno cadastrado</label>
+        <select id="alunoSelect" title="Se ja for cadastrado, selecione seu nome"></select>
+      </div>
+
+      <div class="field">
+        <label>CPF</label>
+        <input id="cpfConfirmA" placeholder="Digite seu CPF para validação" maxlength="14" />
+      </div>
+
+      <div class="menu home-actions">
+        <button class="btn btn-sbv" onclick="startQuiz('sbv')">Iniciar Prova SBV</button>
+        <button class="btn btn-savc" onclick="startQuiz('savc')">Iniciar Prova SAVC</button>
+        <button class="btn btn-sec" onclick="refreshRanking()">Atualizar ranking</button>
+      </div>
+
+      <div id="status" style="margin-top:10px;color:#b71c1c;font-weight:700;"></div>
+    </div>
+
+    <div class="ranking-row">
+      <div class="card">
+        <span class="title-chip">Ranking SBV</span>
+        <table>
+          <thead><tr><th>#</th><th>Iniciais</th><th>Nota</th></tr></thead>
+          <tbody id="rankSBV"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <span class="title-chip">Ranking SAVC</span>
+        <table>
+          <thead><tr><th>#</th><th>Iniciais</th><th>Nota</th></tr></thead>
+          <tbody id="rankSAVC"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELA PROVA -->
+  <section id="quiz-screen" class="hidden">
+    <h2 id="quiz-title"></h2>
+    <p id="quiz-meta" class="quiz-meta"></p>
+    <div id="quiz-container"></div>
+    <button id="submit-btn" onclick="submitQuiz()">Finalizar e Corrigir Prova</button>
+    <div id="results"></div>
+    <button class="btn btn-sec" style="margin-top:12px;" onclick="goHome()">Voltar para tela inicial</button>
+  </section>
+
+  <footer class="site-footer">
+    <span class="footer-brand">
+      <img src="./assets/logo-dev.png" alt="Logo da empresa LB Conexao Dev">
+      <span>2026 Todos os Direitos Reservados Lucivaldo Oliveira Barroso.</span>
+    </span>
+  </footer>
+</div>
+
+<a class="dev-fab" href="./assets/logo-lb-conexao-dev-explosao.mp4" target="_blank" rel="noopener noreferrer" title="LB Conexao Dev">
+  <span class="video-wrap">
+    <video autoplay muted loop playsinline>
+      <source src="./assets/logo-lb-conexao-dev-explosao.mp4" type="video/mp4">
+    </video>
+  </span>
+  <span>Desenvolvido por LB Conexao Dev</span>
+</a>
+
+<button id="timerFab" class="timer-fab hidden" type="button">20:00</button>
+
+<div id="timeoutModal" class="modal hidden">
+  <div class="modal-card">
+    <h3>Tempo encerrado</h3>
+    <p>O tempo de prova foi finalizado. Sua avaliação foi corrigida automaticamente com base nas respostas já marcadas.</p>
+    <button class="btn btn-sec" style="width:100%;" onclick="closeTimeoutModal()">OK</button>
+  </div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="loading-box">
+    <h3>Aguarde um instante</h3>
+    <p id="loadingText">Carregando dados e preparando sua prova...</p>
+  </div>
+</div>
+
+<script src="./questoes-completas.js"></script>
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbwXx-FiH6u50TPdYertjiHRZGdBHQbzUwNsoCGGHyqw381dnU-9Z4pi-tBgj4qgpXJOOw/exec";
+  const LS_ALUNOS = "prova_pcr_alunos";
+  const LS_TENTATIVAS = "prova_pcr_tentativas_por_prova";
+
+  const QUESTIONS_PER_TEST = 20;
+  const QUIZ_SECONDS = 20 * 60;
+  let currentQuestions = [];
+  let currentTest = '';
+  let currentAluno = null;
+  let provaIniciadaEm = 0;
+  let currentTentativa = 0;
+  let quizLocked = false;
+  let timerInterval = null;
+  let timeLeftSeconds = QUIZ_SECONDS;
+
+  function maskCpf(v){
+    const d = String(v||'').replace(/\D/g,'').slice(0,11);
+    return d.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  }
+  function cpfNum(v){ return String(v||'').replace(/\D/g,''); }
+  function upper(v){ return String(v||'').toUpperCase(); }
+  function iniciais(nome){ return upper(nome).trim().split(/\s+/).filter(Boolean).map(p=>p[0]).join('').slice(0,4); }
+
+  function getArray(name){
+    if (typeof globalThis !== 'undefined' && Array.isArray(globalThis[name])) return globalThis[name];
+    try { const v = Function(`return (typeof ${name} !== 'undefined') ? ${name} : undefined;`)(); return Array.isArray(v)?v:[]; } catch { return []; }
+  }
+  function getBanco(type){
+    if (type === 'sbv') return getArray('questoesSBV').concat(getArray('maisQuestoesSBV'));
+    return getArray('questoesSAVC').concat(getArray('maisQuestoesSAVC'));
+  }
+
+  function sanitizeQuestionText(text){
+    return String(text || '').replace(/^\s*\d+\s*[.)-]\s*/, '').trim();
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  function getAlunos(){ try { return JSON.parse(localStorage.getItem(LS_ALUNOS)||'[]'); } catch { return []; } }
+  function setAlunos(v){ localStorage.setItem(LS_ALUNOS, JSON.stringify(v)); }
+  function upsertAluno(a){ const arr=getAlunos(); const i=arr.findIndex(x=>x.cpf===a.cpf); if(i>=0) arr[i]=a; else arr.push(a); setAlunos(arr); }
+  function upsertAlunosBatch(lista){
+    // Espelha exatamente o banco: remove locais que não existem mais no Sheets
+    setAlunos(lista);
+  }
+  function getTentativas(){ try { return JSON.parse(localStorage.getItem(LS_TENTATIVAS)||'{}'); } catch { return {}; } }
+  function setTentativas(v){ localStorage.setItem(LS_TENTATIVAS, JSON.stringify(v)); }
+  function tentativaKey(cpf, prova){ return `${cpf}_${prova}`; }
+  function incTentativa(cpf, prova){
+    const data = getTentativas();
+    const key = tentativaKey(cpf, prova);
+    data[key] = Number(data[key] || 0) + 1;
+    setTentativas(data);
+    return data[key];
+  }
+
+  function fillAlunoSelect(){
+    const s = document.getElementById('alunoSelect');
+    const selected = s.value;
+    const opts = [
+      '<option value="">SE JA FOR CADASTRADO, SELECIONE SEU NOME</option>',
+      '<option value="__NOVO__">OUTRO ALUNO (NOVO CADASTRO)</option>'
+    ]
+      .concat(getAlunos().map(a=>`<option value="${a.cpf}">${a.nome}</option>`));
+    s.innerHTML = opts.join('');
+    if ([...s.options].some(o => o.value === selected)) s.value = selected;
+  }
+
+  function onAlunoChange(){
+    const novo = document.getElementById('alunoSelect').value === '__NOVO__';
+    if(!novo){
+      const a = getAlunos().find(x=>x.cpf===document.getElementById('alunoSelect').value);
+      if(a){ document.getElementById('nome').value = a.nome; document.getElementById('profissao').value = a.profissao; }
+    }
+  }
+
+  function onProfissaoChange(){
+    const outros = document.getElementById('profissao').value === 'OUTROS';
+    document.getElementById('fieldOutraProfissao').style.display = outros ? 'block' : 'none';
+  }
+
+  async function apiPostForm(payload){
+    const body = new URLSearchParams();
+    Object.entries(payload).forEach(([k, v]) => body.append(k, String(v ?? '')));
+
+    const resp = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body
+    });
+
+    const text = await resp.text();
+    let data = null;
+    try { data = JSON.parse(text); } catch {}
+    if (!resp.ok) throw new Error(`Falha HTTP ${resp.status}`);
+    if (!data || data.ok !== true) throw new Error((data && data.error) ? data.error : 'Resposta inválida do servidor');
+    return data;
+  }
+
+  async function refreshRanking(){
+    const setRows = (id, rows) => {
+      const tb = document.getElementById(id);
+      if(!rows.length){ tb.innerHTML = '<tr><td colspan="3">Sem registros ainda.</td></tr>'; return; }
+      tb.innerHTML = rows.map(r=>`<tr><td>${r.posicao}</td><td>${r.iniciais}</td><td>${Number(r.nota).toFixed(2)}</td></tr>`).join('');
+    };
+
+    try {
+      const [sbvRes, savcRes] = await Promise.all([
+        fetch(`${API_URL}?action=ranking&prova=sbv&limit=500`).then(r=>r.json()),
+        fetch(`${API_URL}?action=ranking&prova=savc&limit=500`).then(r=>r.json())
+      ]);
+      setRows('rankSBV', sbvRes.ok ? (sbvRes.ranking||[]) : []);
+      setRows('rankSAVC', savcRes.ok ? (savcRes.ranking||[]) : []);
+      await syncAlunosFromApi();
+    } catch {
+      setRows('rankSBV', []); setRows('rankSAVC', []);
+    }
+  }
+
+  async function syncAlunosFromApi(){
+    const actions = ['list_alunos', 'alunos', 'listar_alunos'];
+    for (const action of actions) {
+      try {
+        const resp = await fetch(`${API_URL}?action=${action}&limit=1000`);
+        const text = await resp.text();
+        let data = null;
+        try { data = JSON.parse(text); } catch {}
+        if (!resp.ok || !data || data.ok !== true) continue;
+
+        const listaBase = Array.isArray(data.alunos) ? data.alunos : (Array.isArray(data.data) ? data.data : []);
+        if (!listaBase.length) continue;
+
+        const lista = listaBase
+          .map(item => ({
+            cpf: cpfNum(item.cpf),
+            nome: upper(String(item.nome || '').trim()),
+            profissao: upper(String(item.profissao || '').trim() || 'OUTROS')
+          }))
+          .filter(item => item.cpf.length === 11 && item.nome);
+
+        if (lista.length) {
+          upsertAlunosBatch(lista);
+          fillAlunoSelect();
+          return;
+        }
+      } catch {}
+    }
+  }
+
+  function showLoading(msg){
+    document.getElementById('loadingText').textContent = msg || 'Carregando dados e preparando sua prova...';
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+  }
+
+  function hideLoading(){
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+
+  function formatClock(totalSec){
+    const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+    const s = String(totalSec % 60).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function updateTimerFab(){
+    const el = document.getElementById('timerFab');
+    el.textContent = formatClock(Math.max(0, timeLeftSeconds));
+    el.classList.toggle('danger', timeLeftSeconds <= 300);
+  }
+
+  function stopTimer(){
+    if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+  }
+
+  function hideTimer(){
+    const el = document.getElementById('timerFab');
+    el.classList.add('hidden');
+    stopTimer();
+  }
+
+  function startTimer(){
+    const el = document.getElementById('timerFab');
+    timeLeftSeconds = QUIZ_SECONDS;
+    updateTimerFab();
+    el.classList.remove('hidden');
+    stopTimer();
+    timerInterval = setInterval(async () => {
+      if (quizLocked) { stopTimer(); return; }
+      timeLeftSeconds -= 1;
+      updateTimerFab();
+      if (timeLeftSeconds <= 0) {
+        stopTimer();
+        await submitQuiz(true);
+      }
+    }, 1000);
+  }
+
+  function openTimeoutModal(){
+    document.getElementById('timeoutModal').classList.remove('hidden');
+  }
+
+  function closeTimeoutModal(){
+    document.getElementById('timeoutModal').classList.add('hidden');
+  }
+
+  function validateAluno(){
+    const status = document.getElementById('status');
+    status.textContent = '';
+
+    const selected = document.getElementById('alunoSelect').value;
+    const cpfA = cpfNum(document.getElementById('cpfConfirmA').value);
+
+    if(!selected){ status.textContent='Em Aluno cadastrado, selecione seu nome ou OUTRO ALUNO.'; return null; }
+    if(!cpfA){ status.textContent='Digite o CPF para validação.'; return null; }
+
+    if(selected === '__NOVO__'){
+      const nome = upper(document.getElementById('nome').value.trim());
+      const profSel = document.getElementById('profissao').value;
+      const prof = profSel === 'OUTROS' ? upper(document.getElementById('outraProfissao').value.trim()) : profSel;
+
+      if(!nome || !prof){ status.textContent='Preencha nome e profissão.'; return null; }
+
+      const aluno = { nome, profissao: prof, cpf: cpfA };
+      upsertAluno(aluno);
+      fillAlunoSelect();
+      return aluno;
+    }
+
+    const aluno = getAlunos().find(a=>a.cpf===selected);
+    if(!aluno){ status.textContent='Aluno selecionado não encontrado.'; return null; }
+    if(cpfA !== aluno.cpf){ status.textContent='CPF não confere com o aluno selecionado.'; return null; }
+    return aluno;
+  }
+
+  async function startQuiz(type){
+    const aluno = validateAluno();
+    if(!aluno) return;
+    const status = document.getElementById('status');
+    showLoading('Carregando dados do aluno e iniciando a prova...');
+
+    try {
+      await apiPostForm({
+        action: 'upsert_aluno',
+        cpf: aluno.cpf,
+        nome: aluno.nome,
+        iniciais: iniciais(aluno.nome),
+        profissao: aluno.profissao
+      });
+      status.textContent = '';
+    } catch (err) {
+      status.textContent = `Falha ao salvar aluno no banco: ${err.message}`;
+      hideLoading();
+      return;
+    }
+
+    const banco = getBanco(type);
+    if(!banco.length){ document.getElementById('status').textContent='Banco de questões não encontrado.'; hideLoading(); return; }
+
+    currentAluno = aluno;
+    currentTest = type;
+    provaIniciadaEm = Date.now();
+    currentTentativa = incTentativa(aluno.cpf, type);
+    quizLocked = false;
+    currentQuestions = shuffle(banco).slice(0, Math.min(QUESTIONS_PER_TEST, banco.length));
+
+    document.getElementById('home-screen').classList.add('hidden');
+    document.getElementById('quiz-screen').classList.remove('hidden');
+    closeTimeoutModal();
+
+    document.getElementById('quiz-title').innerText = type === 'sbv'
+      ? `Prova de Suporte Básico de Vida (SBV) - ${aluno.nome}`
+      : `Prova de Suporte Avançado de Vida (SAVC) - ${aluno.nome}`;
+    document.getElementById('quiz-meta').textContent = `ALUNO: ${aluno.nome} | PROFISSÃO: ${aluno.profissao} | TENTATIVA ${type.toUpperCase()}: ${currentTentativa}`;
+
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('submit-btn').textContent = 'Finalizar e Corrigir Prova';
+
+    let html = '';
+    currentQuestions.forEach((q, index) => {
+      html += `<div class="question-block" id="qblock-${index}">`;
+      html += `<div class="question-title">${sanitizeQuestionText(q.q)}</div>`;
+      html += `<div class="options">`;
+      q.o.forEach((opt, optIndex) => {
+        html += `<label><input type="radio" name="q${index}" value="${optIndex}"> ${opt}</label>`;
+      });
+      html += `</div>`;
+      html += `<div class="feedback" id="feed-${index}">${q.f || ''}</div>`;
+      html += `</div>`;
+    });
+    document.getElementById('quiz-container').innerHTML = html;
+    startTimer();
+    hideLoading();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function submitQuiz(forceByTimer = false){
+    if(!currentQuestions.length){ alert('Escolha uma prova primeiro.'); return; }
+    if(quizLocked){ return; }
+    quizLocked = true;
+    stopTimer();
+
+    let score = 0;
+    const total = currentQuestions.length;
+
+    currentQuestions.forEach((q, index) => {
+      const block = document.getElementById(`qblock-${index}`);
+      const selected = document.querySelector(`input[name="q${index}"]:checked`);
+      const feedback = document.getElementById(`feed-${index}`);
+      const labels = block.querySelectorAll('label');
+      labels.forEach(l => l.className = '');
+
+      if(selected){
+        const selectedVal = Number(selected.value);
+        const selectedLabel = selected.parentElement;
+        if(selectedVal === q.a){ score++; selectedLabel.classList.add('correct'); }
+        else { selectedLabel.classList.add('incorrect'); if(labels[q.a]) labels[q.a].classList.add('correct'); }
+      } else {
+        if(labels[q.a]) labels[q.a].classList.add('correct');
+      }
+      feedback.style.display = 'block';
+    });
+    document.querySelectorAll('#quiz-container input[type="radio"]').forEach(input => { input.disabled = true; });
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('submit-btn').textContent = 'Prova finalizada';
+
+    const percentage = ((score/total)*100).toFixed(0);
+    const p = Number(percentage);
+    let msg = '';
+    if (p < 40) {
+      msg = 'Reprovado. É necessário revisar as Diretrizes de RCP e retomar os principais algoritmos.';
+    } else if (p <= 60) {
+      msg = 'Você precisa melhorar. Revise os pontos críticos e pratique novamente.';
+    } else if (p <= 80) {
+      msg = 'Você está no caminho certo. Continue estudando para consolidar os protocolos.';
+    } else {
+      msg = 'Muito bem! Excelente desempenho e boa aderência às Diretrizes de RCP.';
+    }
+
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = `Sua pontuação: ${score} de ${total} (${percentage}%)<br><span style="font-size:18px;">${msg}</span>`;
+    resultsDiv.style.display = 'block';
+
+    if (currentAluno) {
+      const tempoSeg = Math.max(1, Math.floor((Date.now() - provaIniciadaEm) / 1000));
+      const nota = Number(((score / total) * 100).toFixed(2));
+      try {
+        await apiPostForm({
+          action: 'salvar_tentativa',
+          cpf: currentAluno.cpf,
+          nome: currentAluno.nome,
+          iniciais: iniciais(currentAluno.nome),
+          profissao: currentAluno.profissao,
+          prova: currentTest,
+          acertos: score,
+          total: total,
+          nota: nota,
+          tempo_seg: tempoSeg
+        });
+        resultsDiv.innerHTML += `<br><span style="font-size:16px;color:#1b5e20;">Resultado salvo no banco de dados.</span>`;
+      } catch (err) {
+        resultsDiv.innerHTML += `<br><span style="font-size:16px;color:#b71c1c;">Falha ao salvar no banco: ${err.message}</span>`;
+      }
+    }
+    if (forceByTimer) {
+      openTimeoutModal();
+    }
+
+    window.scrollTo({ top: resultsDiv.offsetTop - 40, behavior: 'smooth' });
+  }
+
+  function goHome(){
+    document.getElementById('quiz-screen').classList.add('hidden');
+    document.getElementById('home-screen').classList.remove('hidden');
+    document.getElementById('quiz-container').innerHTML = '';
+    currentQuestions = [];
+    currentAluno = null;
+    provaIniciadaEm = 0;
+    currentTentativa = 0;
+    quizLocked = false;
+    hideTimer();
+    closeTimeoutModal();
+    refreshRanking();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  (async function boot(){
+    fillAlunoSelect();
+    onAlunoChange();
+    onProfissaoChange();
+    await syncAlunosFromApi();
+    refreshRanking();
+    hideTimer();
+    closeTimeoutModal();
+    hideLoading();
+
+    ['cpfConfirmA'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', e=>e.target.value = maskCpf(e.target.value));
+    });
+    ['nome','outraProfissao'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', e=>e.target.value = upper(e.target.value));
+    });
+
+    document.getElementById('alunoSelect').addEventListener('change', onAlunoChange);
+    document.getElementById('profissao').addEventListener('change', onProfissaoChange);
+  })();
+</script>
+</body>
+</html>
