@@ -122,7 +122,7 @@
           a: 2, 
           f: "<strong>Tema:</strong> Ventilação Adequada.<br><strong>Justificativa:</strong> O foco é evitar a hiperventilação. O ar deve ser insuflado em 1 segundo apenas até observar a elevação do tórax.<br><strong>Bibliografia:</strong> Destaques das Diretrizes da AHA 2020 para RCP e ACE, Pág. 7." },
         
-        { q: "24. Como agir se a vítima estiver em uma poça de água e o DEA chegar?", 
+        { q: "24. Como agir se a vítima estiver com o torax molhado e o DEA necessitar da o choque?", 
           o: ["A) Dar choque mesmo assim.", "B) Secar rapidamente o tórax antes de aplicar as pás.", "C) Não usar o DEA.", "D) Usar pás pediátricas."], 
           a: 1, 
           f: "<strong>Tema:</strong> Segurança no uso do DEA.<br><strong>Justificativa:</strong> A água conduz eletricidade. O paciente deve ser retirado da poça e o tórax seco para que o choque foque no coração e evite queimaduras.<br><strong>Bibliografia:</strong> ACLS - Suporte Avançado de Vida (Barbara Aehlert) 5ª Ed., Pág. 126." },
@@ -511,4 +511,5 @@
           o: ["A) O hospital manda na família.", "B) O médico suspende o tratamento sem a família saber.", "C) Se a família entende e aceita que a RCP é fútil sem exigir sua parada verbalmente, mas sem objetar à decisão da equipe, a RCP pode ser suspensa eticamente.", "D) Que todos devem ser ressuscitados sob coerção."], 
           a: 2, 
           f: "<strong>Tema:</strong> Ética e Limitação de Cuidado.<br><strong>Justificativa:</strong> Esse princípio ético humanizado de 2025 foca em tirar o 'peso' da decisão moral dos ombros das famílias arrasadas pela dor, quando a morte é clinicamente irreversível.<br><strong>Bibliografia:</strong> Destaques Diretrizes AHA 2025 (Ética), Pág. 4." }
+
     ];
