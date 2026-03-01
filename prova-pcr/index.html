@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -42,11 +42,20 @@
     .menu { display:flex; justify-content:center; gap:12px; margin: 16px 0 8px; flex-wrap: wrap; }
     .btn { padding: 12px 26px; border: 0; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 30px; color: #fff; transition: .2s; }
     .btn:hover { opacity: .9; transform: translateY(-1px); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
     .btn-sbv { background: #1976d2; }
     .btn-savc { background: #d32f2f; }
     .btn-sec { background: #4f6282; font-size: 22px; padding: 12px 20px; }
-    .home-actions { flex-wrap: nowrap; }
-    .home-actions .btn { font-size: 20px; padding: 12px 18px; white-space: nowrap; }
+    .home-actions { justify-content: center; align-items: center; flex-wrap: wrap; }
+    .home-actions .btn { font-size: 20px; padding: 12px 18px; min-width: 230px; white-space: nowrap; }
+    .choice-actions { justify-content: center; align-items: center; margin-top: 8px; }
+    .choice-actions .btn { font-size: 18px; padding: 10px 18px; min-width: 240px; }
+    .btn-choice { color: #17345d; box-shadow: inset 0 0 0 1px rgba(23, 52, 93, .16); }
+    .btn-choice-novo { background: #f4c542; }
+    .btn-choice-cadastrado { background: #57b66b; color: #fff; box-shadow: none; }
+    .btn-choice.active { outline: 3px solid rgba(19, 41, 75, .24); outline-offset: 2px; }
+    .helper-text { margin: 10px 0 0; color: #425979; font-size: 17px; line-height: 1.45; }
+    .readonly-field { background: #eaf0f8 !important; }
 
     table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     th, td { border-bottom: 1px solid #d9e4f2; padding: 8px 6px; text-align: left; font-size: 20px; }
@@ -65,6 +74,7 @@
     #submit-btn { width: 100%; background:#388e3c; padding: 14px; font-size: 17px; border:0; border-radius: 8px; color:#fff; font-weight:700; cursor:pointer; }
     #results { margin-top: 16px; padding: 18px; text-align: center; font-size: 22px; font-weight: 700; background: #fff3e0; display: none; border-radius: 8px; border: 2px solid #1976d2; }
     .timer-fab { position: fixed; top: 16px; right: 16px; z-index: 1000; background: #17345d; color: #fff; border-radius: 999px; padding: 10px 16px; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+    .timer-fab.ready { background: #2e7d32; }
     .timer-fab.danger { background: #b71c1c; }
     .modal { position: fixed; inset: 0; z-index: 1200; display: grid; place-items: center; background: rgba(15, 26, 43, .52); }
     .modal-card { width: min(520px, calc(100% - 24px)); background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 10px 28px rgba(0,0,0,.24); }
@@ -74,9 +84,9 @@
     .loading-box { width: min(500px, calc(100% - 24px)); background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 10px 28px rgba(0,0,0,.24); text-align: center; }
     .loading-box h3 { color: #17345d; margin-bottom: 8px; }
     .loading-box p { color: #324867; margin: 0; font-size: 18px; }
-    .site-footer { margin-top: 18px; padding-top: 12px; border-top: 1px solid #d9e4f2; text-align: center; color: #4a607f; font-size: 14px; }
-    .footer-brand { display: inline-flex; align-items: center; gap: 10px; background: #f7fbff; border: 1px solid #d2deef; border-radius: 999px; padding: 8px 14px; }
-    .footer-brand img { height: 34px; width: auto; object-fit: contain; }
+    .site-footer { margin-top: 22px; padding-top: 18px; border-top: 2px solid #bdd0e8; text-align: center; color: #17345d; font-size: 16px; }
+    .footer-brand { display: inline-flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #f2f8ff, #ffffff); border: 1px solid #b8cde6; border-radius: 999px; padding: 12px 18px; box-shadow: 0 8px 18px rgba(19, 41, 75, .12); font-weight: 700; }
+    .footer-brand img { height: 40px; width: auto; object-fit: contain; }
     .dev-fab {
       position: fixed;
       right: 16px;
@@ -121,6 +131,7 @@
       .grid-3, .ranking-row { grid-template-columns: 1fr; }
       .btn { font-size: 24px; }
       .home-actions { flex-wrap: wrap; }
+      .home-actions .btn, .choice-actions .btn { width: 100%; min-width: 0; }
       th, td { font-size: 16px; }
       .dev-fab { right: 10px; bottom: 10px; font-size: 11px; gap: 8px; padding-right: 10px; }
       .dev-fab .video-wrap { width: 36px; height: 36px; }
@@ -137,40 +148,65 @@
     <div class="card">
       <span class="title-chip">Identificação do Aluno</span>
 
-      <div class="grid-3">
+      <p class="helper-text">Escolha se o aluno vai fazer um novo cadastro ou se j&aacute; possui cadastro. Para novo cadastro, informe nome completo, profiss&atilde;o e CPF v&aacute;lido. Para aluno j&aacute; cadastrado, selecione o nome, confira a profiss&atilde;o e digite o CPF correspondente. As provas SBV e SAVC s&oacute; ser&atilde;o liberadas ap&oacute;s essa confirma&ccedil;&atilde;o.</p>
+
+      <div class="menu choice-actions">
+        <button id="btnNovoCadastro" class="btn btn-choice btn-choice-novo" type="button" onclick="setCadastroMode('novo')">NOVO CADASTRO</button>
+        <button id="btnJaCadastrado" class="btn btn-choice btn-choice-cadastrado" type="button" onclick="setCadastroMode('cadastrado')">J&Aacute; SOU CADASTRADO</button>
+      </div>
+
+      <div id="novoCadastroFields" class="hidden">
+        <div class="grid-3">
+          <div class="field">
+            <label>Nome completo</label>
+            <input id="nome" placeholder="Digite nome e sobrenome" />
+          </div>
+          <div class="field">
+            <label>Profissão</label>
+            <select id="profissao">
+              <option value="">Selecione a profissão</option>
+              <option>ENFERMEIRO</option>
+              <option>MEDICO</option>
+              <option>TEC DE ENFERMAGEM</option>
+              <option>CONDUTOR</option>
+              <option>ESTUDANTE MEDICINA</option>
+              <option>ESTUDANTE ENFERMAGEM</option>
+              <option>OUTROS</option>
+            </select>
+          </div>
+          <div class="field" id="fieldOutraProfissao">
+            <label>Outra profissão</label>
+            <input id="outraProfissao" placeholder="Digite a profissão" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>CPF</label>
+          <input id="cpfNovo" placeholder="Digite um CPF válido" maxlength="14" />
+        </div>
+      </div>
+
+      <div id="cadastradoFields" class="hidden">
         <div class="field">
           <label>Nome completo</label>
-          <input id="nome" placeholder="Digite nome e sobrenome" />
+          <input id="alunoNomeBusca" list="alunoNomesList" placeholder="Selecione ou digite seu nome" autocomplete="off" />
+          <datalist id="alunoNomesList"></datalist>
         </div>
+
         <div class="field">
           <label>Profissão</label>
-          <select id="profissao">
-            <option>ENFERMEIRO</option>
-            <option>MEDICO</option>
-            <option>TEC DE ENFERMAGEM</option>
-            <option>CONDUTOR</option>
-            <option>OUTROS</option>
-          </select>
+          <input id="profissaoCadastrado" class="readonly-field" placeholder="A profissão aparecerá automaticamente" readonly />
         </div>
-        <div class="field" id="fieldOutraProfissao">
-          <label>Outra profissão</label>
-          <input id="outraProfissao" placeholder="Digite a profissão" />
+
+        <div class="field hidden" id="fieldCpfCadastrado">
+          <label>CPF</label>
+          <input id="cpfConfirmA" placeholder="Digite o CPF do cadastro" maxlength="14" />
         </div>
-      </div>
-
-      <div class="field">
-        <label>Aluno cadastrado</label>
-        <select id="alunoSelect" title="Se ja for cadastrado, selecione seu nome"></select>
-      </div>
-
-      <div class="field">
-        <label>CPF</label>
-        <input id="cpfConfirmA" placeholder="Digite seu CPF para validação" maxlength="14" />
       </div>
 
       <div class="menu home-actions">
-        <button class="btn btn-sbv" onclick="startQuiz('sbv')">Iniciar Prova SBV</button>
-        <button class="btn btn-savc" onclick="startQuiz('savc')">Iniciar Prova SAVC</button>
+        <button id="btnStartSBV" class="btn btn-sbv" onclick="startQuiz('sbv')" disabled>Iniciar Prova SBV</button>
+        <button id="btnStartSAVC" class="btn btn-savc" onclick="startQuiz('savc')" disabled>Iniciar Prova SAVC</button>
         <button class="btn btn-sec" onclick="refreshRanking()">Atualizar ranking</button>
       </div>
 
@@ -181,7 +217,7 @@
       <div class="card">
         <span class="title-chip">Ranking SBV</span>
         <table>
-          <thead><tr><th>#</th><th>Iniciais</th><th>Nota</th></tr></thead>
+          <thead><tr><th>#</th><th>Iniciais</th><th>Profissão</th><th>Nota</th></tr></thead>
           <tbody id="rankSBV"></tbody>
         </table>
       </div>
@@ -189,7 +225,7 @@
       <div class="card">
         <span class="title-chip">Ranking SAVC</span>
         <table>
-          <thead><tr><th>#</th><th>Iniciais</th><th>Nota</th></tr></thead>
+          <thead><tr><th>#</th><th>Iniciais</th><th>Profissão</th><th>Nota</th></tr></thead>
           <tbody id="rankSAVC"></tbody>
         </table>
       </div>
@@ -203,7 +239,7 @@
     <div id="quiz-container"></div>
     <button id="submit-btn" onclick="submitQuiz()">Finalizar e Corrigir Prova</button>
     <div id="results"></div>
-    <button class="btn btn-sec" style="margin-top:12px;" onclick="goHome()">Voltar para tela inicial</button>
+    <button class="btn btn-sec" style="margin-top:12px;" onclick="goHome()">Voltar ao início e perder esta prova</button>
   </section>
 
   <footer class="site-footer">
@@ -233,6 +269,18 @@
   </div>
 </div>
 
+<div id="earlySubmitModal" class="modal hidden">
+  <div class="modal-card">
+    <h3>Tempo incompatível com a prova</h3>
+    <p>Esse tempo é incompatível com a realização correta da avaliação e pode indicar que a prova não foi feita normalmente. Por isso, esta nota não será validada.</p>
+    <p>Se desejar, você pode sair agora e voltar ao início. Ao sair, esta prova será perdida e nenhuma nota será registrada.</p>
+    <div class="menu" style="margin-top:14px;">
+      <button class="btn btn-sec" type="button" onclick="closeEarlySubmitModal()">Continuar prova</button>
+      <button class="btn btn-savc" type="button" onclick="exitInvalidAttempt()">Sair sem validar nota</button>
+    </div>
+  </div>
+</div>
+
 <div id="loadingOverlay" class="loading-overlay hidden">
   <div class="loading-box">
     <h3>Aguarde um instante</h3>
@@ -248,6 +296,7 @@
 
   const QUESTIONS_PER_TEST = 20;
   const QUIZ_SECONDS = 20 * 60;
+  const MIN_SUBMIT_SECONDS = 6 * 60;
   let currentQuestions = [];
   let currentTest = '';
   let currentAluno = null;
@@ -256,6 +305,7 @@
   let quizLocked = false;
   let timerInterval = null;
   let timeLeftSeconds = QUIZ_SECONDS;
+  let cadastroMode = '';
 
   function maskCpf(v){
     const d = String(v||'').replace(/\D/g,'').slice(0,11);
@@ -264,6 +314,20 @@
   function cpfNum(v){ return String(v||'').replace(/\D/g,''); }
   function upper(v){ return String(v||'').toUpperCase(); }
   function iniciais(nome){ return upper(nome).trim().split(/\s+/).filter(Boolean).map(p=>p[0]).join('').slice(0,4); }
+  function isValidCpf(value){
+    const cpf = cpfNum(value);
+    if(cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+    let sum = 0;
+    for(let i = 0; i < 9; i++) sum += Number(cpf[i]) * (10 - i);
+    let digit = (sum * 10) % 11;
+    if(digit === 10) digit = 0;
+    if(digit !== Number(cpf[9])) return false;
+    sum = 0;
+    for(let i = 0; i < 10; i++) sum += Number(cpf[i]) * (11 - i);
+    digit = (sum * 10) % 11;
+    if(digit === 10) digit = 0;
+    return digit === Number(cpf[10]);
+  }
 
   function getArray(name){
     if (typeof globalThis !== 'undefined' && Array.isArray(globalThis[name])) return globalThis[name];
@@ -302,29 +366,197 @@
     return data[key];
   }
 
+  function getAlunosUnicosPorNome(){
+    const map = new Map();
+    getAlunos()
+      .slice()
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      .forEach(aluno => {
+        const nome = upper(aluno.nome).trim();
+        if(nome && !map.has(nome)) map.set(nome, { ...aluno, nome });
+      });
+    return [...map.values()];
+  }
+
+  function getAlunoByCpf(cpf){
+    const normalizedCpf = cpfNum(cpf);
+    if(!normalizedCpf) return null;
+    return getAlunos().find(a => a.cpf === normalizedCpf) || null;
+  }
+
   function fillAlunoSelect(){
-    const s = document.getElementById('alunoSelect');
-    const selected = s.value;
-    const opts = [
-      '<option value="">SE JA FOR CADASTRADO, SELECIONE SEU NOME</option>',
-      '<option value="__NOVO__">OUTRO ALUNO (NOVO CADASTRO)</option>'
-    ]
-      .concat(getAlunos().map(a=>`<option value="${a.cpf}">${a.nome}</option>`));
-    s.innerHTML = opts.join('');
-    if ([...s.options].some(o => o.value === selected)) s.value = selected;
+    const input = document.getElementById('alunoNomeBusca');
+    const list = document.getElementById('alunoNomesList');
+    const atual = upper(input.value.trim());
+    const alunos = getAlunosUnicosPorNome();
+    list.innerHTML = alunos.map(a=>`<option value="${a.nome}"></option>`).join('');
+    if(atual && !alunos.some(a => a.nome === atual)){
+      input.value = '';
+    }
+  }
+
+  function getAlunoSelecionadoPorNome(){
+    const nome = upper(document.getElementById('alunoNomeBusca').value.trim());
+    if(!nome) return null;
+    return getAlunosUnicosPorNome().find(a => a.nome === nome) || null;
   }
 
   function onAlunoChange(){
-    const novo = document.getElementById('alunoSelect').value === '__NOVO__';
-    if(!novo){
-      const a = getAlunos().find(x=>x.cpf===document.getElementById('alunoSelect').value);
-      if(a){ document.getElementById('nome').value = a.nome; document.getElementById('profissao').value = a.profissao; }
+    const aluno = getAlunoSelecionadoPorNome();
+    const profInput = document.getElementById('profissaoCadastrado');
+    const cpfField = document.getElementById('fieldCpfCadastrado');
+    if(aluno){
+      profInput.value = aluno.profissao;
+      cpfField.classList.remove('hidden');
+    } else {
+      profInput.value = '';
+      cpfField.classList.add('hidden');
+      document.getElementById('cpfConfirmA').value = '';
     }
+    updateStartButtons();
   }
 
   function onProfissaoChange(){
     const outros = document.getElementById('profissao').value === 'OUTROS';
     document.getElementById('fieldOutraProfissao').style.display = outros ? 'block' : 'none';
+    if(!outros) document.getElementById('outraProfissao').value = '';
+    updateStartButtons();
+  }
+
+  function setCadastroMode(mode){
+    cadastroMode = mode;
+    document.getElementById('btnNovoCadastro').classList.toggle('active', mode === 'novo');
+    document.getElementById('btnJaCadastrado').classList.toggle('active', mode === 'cadastrado');
+    document.getElementById('novoCadastroFields').classList.toggle('hidden', mode !== 'novo');
+    document.getElementById('cadastradoFields').classList.toggle('hidden', mode !== 'cadastrado');
+    document.getElementById('status').textContent = '';
+
+    if(mode === 'novo'){
+      document.getElementById('alunoNomeBusca').value = '';
+      document.getElementById('profissaoCadastrado').value = '';
+      document.getElementById('cpfConfirmA').value = '';
+      document.getElementById('fieldCpfCadastrado').classList.add('hidden');
+    } else if(mode === 'cadastrado'){
+      document.getElementById('nome').value = '';
+      document.getElementById('profissao').value = '';
+      document.getElementById('outraProfissao').value = '';
+      document.getElementById('cpfNovo').value = '';
+      onProfissaoChange();
+    }
+    updateStartButtons();
+  }
+
+  function parseRankingDate(value){
+    const raw = String(value || '').trim();
+    if(!raw) return NaN;
+
+    const direct = Date.parse(raw);
+    if(!Number.isNaN(direct)) return direct;
+
+    const normalized = raw.replace(/\s+/, ' ').replace(' ', 'T');
+    const normalizedTime = Date.parse(normalized);
+    if(!Number.isNaN(normalizedTime)) return normalizedTime;
+
+    const match = raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})(?:[ T](\d{1,2})(?::(\d{1,2}))?(?::(\d{1,2}))?)?$/);
+    if(match){
+      const [, dd, mm, yyyy, hh = '0', mi = '0', ss = '0'] = match;
+      const year = yyyy.length === 2 ? `20${yyyy}` : yyyy;
+      return new Date(
+        Number(year),
+        Number(mm) - 1,
+        Number(dd),
+        Number(hh),
+        Number(mi),
+        Number(ss)
+      ).getTime();
+    }
+
+    return NaN;
+  }
+
+  function getRankingTimestamp(row){
+    const combinedDateTime = [
+      row.data_hora_registro,
+      row.dataHoraRegistro,
+      row.data_hora,
+      row.dataHora,
+      row.registrado_em,
+      row.registradoEm,
+      row.created_at,
+      row.createdAt,
+      row.timestamp,
+      row.datetime,
+      row.data_registro,
+      row.dataRegistro,
+      row.submitted_at,
+      row.enviado_em
+    ];
+
+    for(const value of combinedDateTime){
+      const parsed = parseRankingDate(value);
+      if(!Number.isNaN(parsed)) return parsed;
+    }
+
+    const datePart = row.data || row.data_nota || row.dataRegistroNota || row.data_registro || '';
+    const timePart = row.hora || row.hora_registro || row.horaRegistro || row.horario || '';
+    const parsedCombined = parseRankingDate(`${datePart} ${timePart}`.trim());
+    if(!Number.isNaN(parsedCombined)) return parsedCombined;
+
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  function resolveRankingProfissao(row){
+    if(row.profissao && String(row.profissao).trim()) return upper(String(row.profissao).trim());
+    const aluno = getAlunoByCpf(row.cpf);
+    if(aluno && aluno.profissao) return aluno.profissao;
+    return 'OUTROS';
+  }
+
+  function normalizeRanking(rows){
+    return rows
+      .map((row, originalIndex) => ({ ...row, __originalIndex: originalIndex }))
+      .sort((a, b) => {
+        const notaDiff = Number(b.nota || 0) - Number(a.nota || 0);
+        if(notaDiff !== 0) return notaDiff;
+        const timeDiff = getRankingTimestamp(a) - getRankingTimestamp(b);
+        if(timeDiff !== 0) return timeDiff;
+        return a.__originalIndex - b.__originalIndex;
+      })
+      .map((row, index) => {
+        const { __originalIndex, ...cleanRow } = row;
+        return { ...cleanRow, profissao: resolveRankingProfissao(cleanRow), posicao: index + 1 };
+      });
+  }
+
+  function updateStartButtons(){
+    const aluno = validateAluno(true);
+    const disabled = !aluno;
+    const status = document.getElementById('status');
+    document.getElementById('btnStartSBV').disabled = disabled;
+    document.getElementById('btnStartSAVC').disabled = disabled;
+    if(aluno){
+      status.textContent = '';
+      return;
+    }
+
+    if(cadastroMode === 'cadastrado'){
+      const alunoSelecionado = getAlunoSelecionadoPorNome();
+      const cpfDigitado = cpfNum(document.getElementById('cpfConfirmA').value);
+      if(alunoSelecionado && cpfDigitado.length === 11){
+        validateAluno(false);
+        return;
+      }
+    }
+
+    if(cadastroMode === 'novo'){
+      const cpfNovo = cpfNum(document.getElementById('cpfNovo').value);
+      if(cpfNovo.length === 11){
+        validateAluno(false);
+        return;
+      }
+    }
+
+    status.textContent = '';
   }
 
   async function apiPostForm(payload){
@@ -348,8 +580,9 @@
   async function refreshRanking(){
     const setRows = (id, rows) => {
       const tb = document.getElementById(id);
-      if(!rows.length){ tb.innerHTML = '<tr><td colspan="3">Sem registros ainda.</td></tr>'; return; }
-      tb.innerHTML = rows.map(r=>`<tr><td>${r.posicao}</td><td>${r.iniciais}</td><td>${Number(r.nota).toFixed(2)}</td></tr>`).join('');
+      const normalized = normalizeRanking(rows);
+      if(!normalized.length){ tb.innerHTML = '<tr><td colspan="4">Sem registros ainda.</td></tr>'; return; }
+      tb.innerHTML = normalized.map(r=>`<tr><td>${r.posicao}</td><td>${r.iniciais || ''}</td><td>${r.profissao || 'OUTROS'}</td><td>${Number(r.nota).toFixed(2)}</td></tr>`).join('');
     };
 
     try {
@@ -357,8 +590,8 @@
         fetch(`${API_URL}?action=ranking&prova=sbv&limit=500`).then(r=>r.json()),
         fetch(`${API_URL}?action=ranking&prova=savc&limit=500`).then(r=>r.json())
       ]);
-      setRows('rankSBV', sbvRes.ok ? (sbvRes.ranking||[]) : []);
-      setRows('rankSAVC', savcRes.ok ? (savcRes.ranking||[]) : []);
+      setRows('rankSBV', sbvRes.ok ? (Array.isArray(sbvRes.ranking) ? sbvRes.ranking : (sbvRes.data || [])) : []);
+      setRows('rankSAVC', savcRes.ok ? (Array.isArray(savcRes.ranking) ? savcRes.ranking : (savcRes.data || [])) : []);
       await syncAlunosFromApi();
     } catch {
       setRows('rankSBV', []); setRows('rankSAVC', []);
@@ -389,6 +622,7 @@
         if (lista.length) {
           upsertAlunosBatch(lista);
           fillAlunoSelect();
+          onAlunoChange();
           return;
         }
       } catch {}
@@ -412,7 +646,9 @@
 
   function updateTimerFab(){
     const el = document.getElementById('timerFab');
+    const elapsedSeconds = QUIZ_SECONDS - Math.max(0, timeLeftSeconds);
     el.textContent = formatClock(Math.max(0, timeLeftSeconds));
+    el.classList.toggle('ready', elapsedSeconds >= MIN_SUBMIT_SECONDS && timeLeftSeconds > 300);
     el.classList.toggle('danger', timeLeftSeconds <= 300);
   }
 
@@ -451,32 +687,51 @@
     document.getElementById('timeoutModal').classList.add('hidden');
   }
 
-  function validateAluno(){
+  function openEarlySubmitModal(){
+    document.getElementById('earlySubmitModal').classList.remove('hidden');
+  }
+
+  function closeEarlySubmitModal(){
+    document.getElementById('earlySubmitModal').classList.add('hidden');
+  }
+
+  function exitInvalidAttempt(){
+    closeEarlySubmitModal();
+    goHome();
+  }
+
+  function validateAluno(silent = false){
     const status = document.getElementById('status');
-    status.textContent = '';
+    if(!silent) status.textContent = '';
+    const setError = (message) => {
+      if(!silent) status.textContent = message;
+      return null;
+    };
 
-    const selected = document.getElementById('alunoSelect').value;
-    const cpfA = cpfNum(document.getElementById('cpfConfirmA').value);
+    if(!cadastroMode) return setError('Escolha NOVO CADASTRO ou JÁ SOU CADASTRADO.');
 
-    if(!selected){ status.textContent='Em Aluno cadastrado, selecione seu nome ou OUTRO ALUNO.'; return null; }
-    if(!cpfA){ status.textContent='Digite o CPF para validação.'; return null; }
-
-    if(selected === '__NOVO__'){
+    if(cadastroMode === 'novo'){
       const nome = upper(document.getElementById('nome').value.trim());
       const profSel = document.getElementById('profissao').value;
       const prof = profSel === 'OUTROS' ? upper(document.getElementById('outraProfissao').value.trim()) : profSel;
+      const cpf = cpfNum(document.getElementById('cpfNovo').value);
 
-      if(!nome || !prof){ status.textContent='Preencha nome e profissão.'; return null; }
+      if(!nome || !prof) return setError('Preencha nome e profissão.');
+      if(!cpf) return setError('Digite o CPF do novo cadastro.');
+      if(!isValidCpf(cpf)) return setError('Digite um CPF válido para liberar as provas.');
 
-      const aluno = { nome, profissao: prof, cpf: cpfA };
-      upsertAluno(aluno);
+      const aluno = { nome, profissao: prof, cpf };
+      if(!silent) upsertAluno(aluno);
       fillAlunoSelect();
       return aluno;
     }
 
-    const aluno = getAlunos().find(a=>a.cpf===selected);
-    if(!aluno){ status.textContent='Aluno selecionado não encontrado.'; return null; }
-    if(cpfA !== aluno.cpf){ status.textContent='CPF não confere com o aluno selecionado.'; return null; }
+    const aluno = getAlunoSelecionadoPorNome();
+    const cpfA = cpfNum(document.getElementById('cpfConfirmA').value);
+    if(!aluno) return setError('Selecione seu nome na lista de cadastrados.');
+    if(!cpfA) return setError('Digite o CPF do cadastro para validação.');
+    if(!isValidCpf(cpfA)) return setError('Digite um CPF válido para continuar.');
+    if(cpfA !== aluno.cpf) return setError('O CPF digitado não confere com o cadastro do banco de dados para este aluno. Verifique os dados informados.');
     return aluno;
   }
 
@@ -514,6 +769,7 @@
     document.getElementById('home-screen').classList.add('hidden');
     document.getElementById('quiz-screen').classList.remove('hidden');
     closeTimeoutModal();
+    closeEarlySubmitModal();
 
     document.getElementById('quiz-title').innerText = type === 'sbv'
       ? `Prova de Suporte Básico de Vida (SBV) - ${aluno.nome}`
@@ -545,6 +801,20 @@
   async function submitQuiz(forceByTimer = false){
     if(!currentQuestions.length){ alert('Escolha uma prova primeiro.'); return; }
     if(quizLocked){ return; }
+    const elapsedSeconds = Math.max(0, Math.floor((Date.now() - provaIniciadaEm) / 1000));
+    if(!forceByTimer && elapsedSeconds < MIN_SUBMIT_SECONDS){
+      openEarlySubmitModal();
+      return;
+    }
+    if(!forceByTimer){
+      const unanswered = currentQuestions.findIndex((_, index) => !document.querySelector(`input[name="q${index}"]:checked`));
+      if(unanswered !== -1){
+        alert('Todas as questões são obrigatórias. Responda toda a prova antes de finalizar.');
+        const block = document.getElementById(`qblock-${unanswered}`);
+        if(block) block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
     quizLocked = true;
     stopTimer();
 
@@ -628,29 +898,41 @@
     quizLocked = false;
     hideTimer();
     closeTimeoutModal();
+    closeEarlySubmitModal();
     refreshRanking();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   (async function boot(){
     fillAlunoSelect();
-    onAlunoChange();
     onProfissaoChange();
     await syncAlunosFromApi();
     refreshRanking();
     hideTimer();
     closeTimeoutModal();
+    closeEarlySubmitModal();
     hideLoading();
 
-    ['cpfConfirmA'].forEach(id=>{
+    ['cpfConfirmA','cpfNovo'].forEach(id=>{
       document.getElementById(id).addEventListener('input', e=>e.target.value = maskCpf(e.target.value));
     });
     ['nome','outraProfissao'].forEach(id=>{
-      document.getElementById(id).addEventListener('input', e=>e.target.value = upper(e.target.value));
+      document.getElementById(id).addEventListener('input', e=>{
+        e.target.value = upper(e.target.value);
+        updateStartButtons();
+      });
     });
 
-    document.getElementById('alunoSelect').addEventListener('change', onAlunoChange);
+    ['cpfConfirmA','cpfNovo'].forEach(id=>{
+      document.getElementById(id).addEventListener('input', updateStartButtons);
+    });
+    document.getElementById('alunoNomeBusca').addEventListener('input', e=>{
+      e.target.value = upper(e.target.value);
+      onAlunoChange();
+    });
+    document.getElementById('alunoNomeBusca').addEventListener('change', onAlunoChange);
     document.getElementById('profissao').addEventListener('change', onProfissaoChange);
+    updateStartButtons();
   })();
 </script>
 </body>
